@@ -1,23 +1,17 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <OfficeApp
   xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xsi:type="MailApp">
 
-  <Id>d5e6f7a8-b9c0-1234-defa-234567890123</Id>
-  <Version>1.0.0</Version>
+  <Id>a9b0c1d2-e3f4-5678-abcd-567890123456</Id>
+  <Version>1.0.1</Version>
   <ProviderName>Vistamark Investments</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Vistamark AI Email Assistant"/>
-  <Description DefaultValue="Revise and polish emails with Claude AI directly in Outlook."/>
+  <Description DefaultValue="Revise emails with Claude AI inside Outlook."/>
   <IconUrl DefaultValue="https://mrrvista.github.io/vistamark-addin/icon-64.png"/>
-  <HighResolutionIconUrl DefaultValue="https://mrrvista.github.io/vistamark-addin/icon-128.png"/>
-  <SupportUrl DefaultValue="https://vistamarkllc.com"/>
-  <AppDomains>
-    <AppDomain>https://mrrvista.github.io</AppDomain>
-    <AppDomain>https://api.anthropic.com</AppDomain>
-  </AppDomains>
 
   <Hosts>
     <Host Name="Mailbox"/>
@@ -33,16 +27,13 @@
     <Form xsi:type="ItemEdit">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://mrrvista.github.io/vistamark-addin/taskpane.html"/>
-        <RequestedHeight>550</RequestedHeight>
       </DesktopSettings>
     </Form>
   </FormSettings>
 
   <Permissions>ReadWriteItem</Permissions>
 
-  <Rule xsi:type="RuleCollection" Mode="Or">
-    <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
-  </Rule>
+  <Rule xsi:type="ItemIs" ItemType="Message" FormType="Edit"/>
 
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides" xsi:type="VersionOverridesV1_0">
     <Requirements>
@@ -50,6 +41,7 @@
         <bt:Set Name="Mailbox"/>
       </bt:Sets>
     </Requirements>
+
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
@@ -80,6 +72,7 @@
         </DesktopFormFactor>
       </Host>
     </Hosts>
+
     <Resources>
       <bt:Images>
         <bt:Image id="Icon.16x16" DefaultValue="https://mrrvista.github.io/vistamark-addin/icon-16.png"/>
