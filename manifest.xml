@@ -5,7 +5,7 @@
   xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
   xsi:type="MailApp">
 
-  <Id>c4d5e6f7-a8b9-0123-cdef-123456789012</Id>
+  <Id>d5e6f7a8-b9c0-1234-defa-234567890123</Id>
   <Version>1.0.0</Version>
   <ProviderName>Vistamark Investments</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
@@ -14,6 +14,10 @@
   <IconUrl DefaultValue="https://mrrvista.github.io/vistamark-addin/icon-64.png"/>
   <HighResolutionIconUrl DefaultValue="https://mrrvista.github.io/vistamark-addin/icon-128.png"/>
   <SupportUrl DefaultValue="https://vistamarkllc.com"/>
+  <AppDomains>
+    <AppDomain>https://mrrvista.github.io</AppDomain>
+    <AppDomain>https://api.anthropic.com</AppDomain>
+  </AppDomains>
 
   <Hosts>
     <Host Name="Mailbox"/>
@@ -46,7 +50,6 @@
         <bt:Set Name="Mailbox"/>
       </bt:Sets>
     </Requirements>
-
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
@@ -77,7 +80,6 @@
         </DesktopFormFactor>
       </Host>
     </Hosts>
-
     <Resources>
       <bt:Images>
         <bt:Image id="Icon.16x16" DefaultValue="https://mrrvista.github.io/vistamark-addin/icon-16.png"/>
