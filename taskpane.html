@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vistamark AI Email Assistant</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+    :root {
+      --navy: #0f2847;
+      --navy-mid: #1a3a5c;
+      --gold: #c9a84c;
+      --gold-light: #e8c878;
+      --cream: #f9f6f0;
+      --slate: #4a5568;
+      --border: #dde3eb;
+      --success: #2d7a4f;
+      --error: #c0392b;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--navy);
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      background: var(--navy);
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo {
+      font-family: 'DM Serif Display', serif;
+      color: var(--gold);
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+    .header-sub {
+      color: rgba(255,255,255,0.45);
+      font-size: 11px;
+      margin-top: 1px;
+    }
+    .header-icon {
+      width: 32px; height: 32px;
+      background: var(--gold);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-icon svg { width: 18px; height: 18px; }
+
+    /* ─── API Key Section ─── */
+    #apiKeySection {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+    }
+    .api-row {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .api-label {
+      font-size: 11px; color: var(--slate);
+      margin-bottom: 5px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .api-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 10px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--navy);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .api-input:focus { border-color: var(--navy-mid); }
+    .btn-save-key {
+      padding: 7px 14px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-save-key:hover { background: var(--navy-mid); }
+    .key-saved { font-size: 11px; color: var(--success); margin-top: 5px; display: none; }
+
+    /* ─── Main Content ─── */
+    .main { padding: 14px 16px; }
+
+    /* ─── Controls ─── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--slate);
+      margin-bottom: 7px;
+    }
+
+    .tone-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+    .tone-btn {
+      padding: 8px 10px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--slate);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .tone-btn:hover { border-color: var(--navy-mid); color: var(--navy); }
+    .tone-btn.active {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: #fff;
+    }
+    .tone-btn .tone-emoji { font-size: 14px; }
+
+    .custom-instruction {
+      margin-bottom: 14px;
+    }
+    .custom-textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--navy);
+      resize: vertical;
+      min-height: 60px;
+      outline: none;
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+    .custom-textarea:focus { border-color: var(--navy-mid); }
+    .custom-textarea::placeholder { color: #b0b8c4; }
+
+    /* ─── Action Buttons ─── */
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--navy-mid); }
+    .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--navy);
+    }
+    .btn-gold:hover:not(:disabled) { background: var(--gold-light); }
+
+    /* ─── Result Area ─── */
+    #resultSection { display: none; margin-top: 14px; }
+    .result-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--slate);
+      margin-bottom: 7px;
+    }
+    .result-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-size: 12.5px;
+      line-height: 1.65;
+      color: var(--navy);
+      max-height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-bottom: 10px;
+    }
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .btn-secondary {
+      padding: 9px;
+      border: 1.5px solid var(--border);
+      background: #fff;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      color: var(--slate);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+
+    /* ─── Status / Spinner ─── */
+    .status-bar {
+      text-align: center;
+      font-size: 12px;
+      color: var(--slate);
+      padding: 8px;
+      display: none;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed; bottom: 16px; left: 16px; right: 16px;
+      background: var(--navy);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 12.5px;
+      font-weight: 500;
+      text-align: center;
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--error); }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+
+    /* Loading skeleton */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 4px;
+      height: 12px;
+      margin-bottom: 8px;
+    }
+    .skeleton:last-child { width: 70%; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#0f2847"/>
+      <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#0f2847" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <div>
+    <div class="header-logo">Vistamark</div>
+    <div class="header-sub">AI Email Assistant</div>
+  </div>
+</div>
+
+<!-- API Key -->
+<div id="apiKeySection">
+  <div class="api-label">Anthropic API Key</div>
+  <div class="api-row">
+    <input type="password" id="apiKeyInput" class="api-input" placeholder="sk-ant-api03-…"/>
+    <button class="btn-save-key" onclick="saveApiKey()">Save</button>
+  </div>
+  <div class="key-saved" id="keySavedMsg">✓ Key saved for this session</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Tone Selector -->
+  <div class="section-label">Revision Style</div>
+  <div class="tone-grid">
+    <button class="tone-btn active" data-tone="professional" onclick="selectTone(this)">
+      <span class="tone-emoji">💼</span> Professional
+    </button>
+    <button class="tone-btn" data-tone="concise" onclick="selectTone(this)">
+      <span class="tone-emoji">✂️</span> Concise
+    </button>
+    <button class="tone-btn" data-tone="warm" onclick="selectTone(this)">
+      <span class="tone-emoji">🤝</span> Warm & Friendly
+    </button>
+    <button class="tone-btn" data-tone="assertive" onclick="selectTone(this)">
+      <span class="tone-emoji">💪</span> Assertive
+    </button>
+    <button class="tone-btn" data-tone="formal" onclick="selectTone(this)">
+      <span class="tone-emoji">🎩</span> Formal / Legal
+    </button>
+    <button class="tone-btn" data-tone="institutional" onclick="selectTone(this)">
+      <span class="tone-emoji">🏛️</span> Institutional
+    </button>
+  </div>
+
+  <!-- Custom Instructions -->
+  <div class="custom-instruction">
+    <div class="section-label">Custom Instructions (optional)</div>
+    <textarea id="customInstructions" class="custom-textarea"
+      placeholder="e.g. Make it shorter. Add a call to action. Remove the second paragraph."></textarea>
+  </div>
+
+  <!-- Revise Button -->
+  <button class="btn-primary" id="reviseBtn" onclick="reviseEmail()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    </svg>
+    Revise Draft
+  </button>
+
+  <!-- Status -->
+  <div class="status-bar" id="statusBar">
+    <span class="spinner"></span> Calling Claude…
+  </div>
+
+  <!-- Result -->
+  <div id="resultSection">
+    <div class="divider"></div>
+    <div class="result-label">Revised Draft</div>
+    <div class="result-box" id="resultBox"></div>
+    <div class="result-actions">
+      <button class="btn-primary btn-gold" onclick="acceptRevision()" style="margin-bottom:0">
+        ✓ Replace Body
+      </button>
+      <button class="btn-secondary" onclick="clearResult()">✕ Discard</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn-primary" onclick="reviseEmail()" style="background:#fff; color:var(--navy); border:1.5px solid var(--border); margin-bottom:0">
+        ↺ Revise Again
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let selectedTone = 'professional';
+  let revisedBody = '';
+  let apiKey = '';
+
+  // ─── Office Init ───────────────────────────────────────────────────────────
+  Office.onReady(function(info) {
+    if (info.host === Office.HostType.Outlook) {
+      const saved = localStorage.getItem('vm_api_key');
+      if (saved) {
+        apiKey = saved;
+        document.getElementById('apiKeyInput').value = saved;
+        document.getElementById('keySavedMsg').style.display = 'block';
+      }
+    }
+  });
+
+  // ─── API Key ───────────────────────────────────────────────────────────────
+  function saveApiKey() {
+    const val = document.getElementById('apiKeyInput').value.trim();
+    if (!val.startsWith('sk-ant')) {
+      showToast('Enter a valid Anthropic API key (starts with sk-ant)', 'error');
+      return;
+    }
+    apiKey = val;
+    localStorage.setItem('vm_api_key', val);
+    document.getElementById('keySavedMsg').style.display = 'block';
+    showToast('API key saved', 'success');
+  }
+
+  // ─── Tone Selection ────────────────────────────────────────────────────────
+  function selectTone(btn) {
+    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTone = btn.dataset.tone;
+  }
+
+  // ─── Get Email Body ────────────────────────────────────────────────────────
+  function getEmailBody() {
+    return new Promise((resolve, reject) => {
+      Office.context.mailbox.item.body.getAsync(
+        Office.CoercionType.Text,
+        { asyncContext: 'getBody' },
+        (result) => {
+          if (result.status === Office.AsyncResultStatus.Succeeded) {
+            resolve(result.value);
+          } else {
+            reject(result.error.message);
+          }
+        }
+      );
+    });
+  }
+
+  function getEmailSubject() {
+    return new Promise((resolve) => {
+      const item = Office.context.mailbox.item;
+      if (item.subject && item.subject.getAsync) {
+        item.subject.getAsync({}, (r) => {
+          resolve(r.status === Office.AsyncResultStatus.Succeeded ? r.value : '');
+        });
+      } else {
+        resolve(item.subject || '');
+      }
+    });
+  }
+
+  // ─── Tone Prompts ──────────────────────────────────────────────────────────
+  const TONE_PROMPTS = {
+    professional:  'Revise this email to be polished, professional, and clear. Maintain a confident, business-appropriate tone suitable for client-facing or advisor communications.',
+    concise:       'Revise this email to be significantly more concise. Cut filler, redundancy, and unnecessary pleasantries. Keep every sentence purposeful. Preserve all key points.',
+    warm:          'Revise this email to feel warm, approachable, and genuinely personable — while remaining professional. It should build rapport without being overly casual.',
+    assertive:     'Revise this email to be direct, confident, and assertive. State positions clearly. Eliminate hedging language. Appropriate for negotiations or firm requests.',
+    formal:        'Revise this email to be highly formal — suitable for legal correspondence, regulatory communications, or institutional parties. Use precise, measured language.',
+    institutional: 'Revise this email for an institutional audience (endowments, foundations, pension committees, or sophisticated investors). Use industry-appropriate terminology and a measured, authoritative tone.'
+  };
+
+  // ─── Main Revise Function ──────────────────────────────────────────────────
+  async function reviseEmail() {
+    if (!apiKey) {
+      showToast('Please enter and save your Anthropic API key first.', 'error');
+      return;
+    }
+
+    const reviseBtn = document.getElementById('reviseBtn');
+    const statusBar = document.getElementById('statusBar');
+    const resultSection = document.getElementById('resultSection');
+
+    reviseBtn.disabled = true;
+    statusBar.style.display = 'block';
+    resultSection.style.display = 'none';
+
+    try {
+      const [body, subject] = await Promise.all([getEmailBody(), getEmailSubject()]);
+
+      if (!body || body.trim().length < 10) {
+        showToast('The email body appears to be empty. Write a draft first.', 'error');
+        return;
+      }
+
+      const toneInstruction = TONE_PROMPTS[selectedTone] || TONE_PROMPTS.professional;
+      const custom = document.getElementById('customInstructions').value.trim();
+
+      const systemPrompt = `You are an expert business writing assistant for Matt Rice, CFA, CAIA — Managing Partner and CIO of Vistamark Investments LLC, a boutique RIA based in Hinsdale, Illinois. Matt advises ultra-high-net-worth clients, endowments, foundations, and institutional investors. His communications must reflect the standards of a seasoned investment professional.
+
+Your job is to revise email drafts. Return ONLY the revised email body text — no subject line, no preamble, no explanation, no markdown formatting. Just the clean, revised email body ready to paste.`;
+
+      const userPrompt = `Subject: ${subject || '(no subject)'}
+
+${toneInstruction}${custom ? '\n\nAdditional instructions: ' + custom : ''}
+
+Here is the email draft to revise:
+
+---
+${body.trim()}
+---
+
+Return only the revised email body. No preamble. No explanation.`;
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2048,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: userPrompt }]
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error?.message || `API error ${response.status}`);
+      }
+
+      const data = await response.json();
+      revisedBody = data.content?.[0]?.text || '';
+
+      if (!revisedBody) throw new Error('Empty response from Claude.');
+
+      document.getElementById('resultBox').textContent = revisedBody;
+      resultSection.style.display = 'block';
+      resultSection.scrollIntoView({ behavior: 'smooth' });
+
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    } finally {
+      reviseBtn.disabled = false;
+      statusBar.style.display = 'none';
+    }
+  }
+
+  // ─── Accept Revision ───────────────────────────────────────────────────────
+  function acceptRevision() {
+    if (!revisedBody) return;
+
+    Office.context.mailbox.item.body.setAsync(
+      revisedBody,
+      { coercionType: Office.CoercionType.Text },
+      (result) => {
+        if (result.status === Office.AsyncResultStatus.Succeeded) {
+          showToast('✓ Email body updated!', 'success');
+          clearResult();
+        } else {
+          showToast('Error updating body: ' + result.error.message, 'error');
+        }
+      }
+    );
+  }
+
+  // ─── Clear ─────────────────────────────────────────────────────────────────
+  function clearResult() {
+    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('resultBox').textContent = '';
+    revisedBody = '';
+  }
+
+  // ─── Toast ─────────────────────────────────────────────────────────────────
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + type;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+</script>
+</body>
+</html>
