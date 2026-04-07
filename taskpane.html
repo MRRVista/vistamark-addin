@@ -514,16 +514,72 @@ Output: ONLY the email body. No subject. No preamble. Clean plain text, blank li
     document.getElementById('step-draft').className     = 'step';
   }
 
-  // ─── Replace Body ─────────────────────────────────────────────────────────
+  // ─── Replace Body (preserves quoted thread below divider) ────────────────
   function replaceBody() {
     if (!revisedHtml) { showToast('No revision to apply yet.', 'error'); return; }
-    Office.context.mailbox.item.body.setAsync(revisedHtml, { coercionType: Office.CoercionType.Html },
-      result => {
-        if (result.status === Office.AsyncResultStatus.Succeeded) {
-          showToast('Email body updated!', 'success'); discardRevision();
-        } else {
-          showToast('Could not update body: ' + (result.error?.message || 'Unknown error'), 'error');
+
+    // Step 1: Read the current body as HTML so we can find and keep the quoted thread
+    Office.context.mailbox.item.body.getAsync(
+      Office.CoercionType.Html,
+      {},
+      function(readResult) {
+        if (readResult.status !== Office.AsyncResultStatus.Succeeded) {
+          showToast('Could not read body: ' + (readResult.error?.message || 'Unknown error'), 'error');
+          return;
         }
+
+        const currentHtml = readResult.value || '';
+
+        // Step 2: Locate the quoted thread divider.
+        // Outlook uses several patterns — try them in priority order.
+        let quotedThread = '';
+
+        // Pattern 1: Outlook's standard reply/forward wrapper div
+        const rplyDiv = currentHtml.match(/<div[^>]+id=["']divRplyFwdMsg["'][^>]*>/i);
+        if (rplyDiv) {
+          quotedThread = currentHtml.substring(currentHtml.indexOf(rplyDiv[0]));
+        }
+
+        // Pattern 2: <hr> separator (Outlook desktop classic style)
+        if (!quotedThread) {
+          const hr = currentHtml.match(/<hr\b[^>]*>/i);
+          if (hr) {
+            quotedThread = currentHtml.substring(currentHtml.indexOf(hr[0]));
+          }
+        }
+
+        // Pattern 3: Blockquote (Gmail-style threads opened in Outlook)
+        if (!quotedThread) {
+          const bq = currentHtml.match(/<blockquote\b[^>]*>/i);
+          if (bq) {
+            quotedThread = currentHtml.substring(currentHtml.indexOf(bq[0]));
+          }
+        }
+
+        // Pattern 4: "From:" header line (plain-text-style replies)
+        if (!quotedThread) {
+          const fromLine = currentHtml.match(/<[^>]+>[\s]*From:[\s]/i);
+          if (fromLine) {
+            quotedThread = currentHtml.substring(currentHtml.indexOf(fromLine[0]));
+          }
+        }
+
+        // Step 3: Combine revised content + preserved thread
+        const newBody = revisedHtml + (quotedThread ? '\n' + quotedThread : '');
+
+        // Step 4: Write back
+        Office.context.mailbox.item.body.setAsync(
+          newBody,
+          { coercionType: Office.CoercionType.Html },
+          function(writeResult) {
+            if (writeResult.status === Office.AsyncResultStatus.Succeeded) {
+              showToast('Email body updated!', 'success');
+              discardRevision();
+            } else {
+              showToast('Could not update body: ' + (writeResult.error?.message || 'Unknown error'), 'error');
+            }
+          }
+        );
       }
     );
   }
