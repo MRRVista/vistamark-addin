@@ -168,18 +168,18 @@
   <div class="axis-group">
     <div class="axis-label">Warmth</div>
     <div class="axis-row">
-      <button class="axis-btn active-warmth" data-axis="warmth" data-val="warm"      onclick="selectAxis(this)">&#129309; Warm</button>
-      <button class="axis-btn"               data-axis="warmth" data-val="neutral"   onclick="selectAxis(this)">&#128188; Professional</button>
-      <button class="axis-btn"               data-axis="warmth" data-val="assertive" onclick="selectAxis(this)">&#128170; Assertive</button>
+      <button class="axis-btn active-warmth" id="wb-warm"       onclick="selectAxis(this,'warmth','warm')">&#129309; Warm</button>
+      <button class="axis-btn"               id="wb-neutral"    onclick="selectAxis(this,'warmth','neutral')">&#128188; Professional</button>
+      <button class="axis-btn"               id="wb-assertive"  onclick="selectAxis(this,'warmth','assertive')">&#128170; Assertive</button>
     </div>
   </div>
 
   <div class="axis-group">
     <div class="axis-label">Length</div>
     <div class="axis-row">
-      <button class="axis-btn"               data-axis="length" data-val="pithy"  onclick="selectAxis(this)">&#9986; Pithy</button>
-      <button class="axis-btn active-length" data-axis="length" data-val="medium" onclick="selectAxis(this)">&#8652; Medium</button>
-      <button class="axis-btn"               data-axis="length" data-val="long"   onclick="selectAxis(this)">&#128221; Long</button>
+      <button class="axis-btn"               id="lb-pithy"  onclick="selectAxis(this,'length','pithy')">&#9986; Pithy</button>
+      <button class="axis-btn active-length" id="lb-medium" onclick="selectAxis(this,'length','medium')">&#8652; Medium</button>
+      <button class="axis-btn"               id="lb-long"   onclick="selectAxis(this,'length','long')">&#128221; Long</button>
     </div>
   </div>
 
@@ -309,15 +309,21 @@
   }
 
   // ── Tone ───────────────────────────────────────────────────────────────────
-  function selectAxis(btn) {
-    var axis      = btn.dataset.axis;
-    var activeClass = axis === 'warmth' ? 'active-warmth' : 'active-length';
-    document.querySelectorAll('.axis-btn[data-axis="' + axis + '"]').forEach(function(b) {
-      b.classList.remove('active-warmth', 'active-length');
-    });
+  function selectAxis(btn, axis, val) {
+    var activeClass  = axis === 'warmth' ? 'active-warmth' : 'active-length';
+    var warmthIds = ['wb-warm','wb-neutral','wb-assertive'];
+    var lengthIds  = ['lb-pithy','lb-medium','lb-long'];
+    var group = axis === 'warmth' ? warmthIds : lengthIds;
+    for (var i = 0; i < group.length; i++) {
+      var el = document.getElementById(group[i]);
+      if (el) {
+        el.classList.remove('active-warmth');
+        el.classList.remove('active-length');
+      }
+    }
     btn.classList.add(activeClass);
-    if (axis === 'warmth') selectedWarmth = btn.dataset.val;
-    else                   selectedLength  = btn.dataset.val;
+    if (axis === 'warmth') selectedWarmth = val;
+    else                   selectedLength  = val;
   }
 
   // ── Toggles ────────────────────────────────────────────────────────────────
