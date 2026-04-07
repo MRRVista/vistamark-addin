@@ -37,6 +37,7 @@
     <Hosts>
       <Host xsi:type="MailHost">
         <DesktopFormFactor>
+          <RequestedWidth>460</RequestedWidth>
           <FunctionFile resid="Commands.Url"/>
           <ExtensionPoint xsi:type="MessageComposeCommandSurface">
             <OfficeTab id="TabDefault">
