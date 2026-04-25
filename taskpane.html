@@ -1,133 +1,135 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Vistamark AI Email Assistant</title>
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vistamark AI Email Assistant</title>
+<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
 
-    :root {
-      --navy:    #0f2047;
-      --gold:    #d4b772;
-      --gold-dk: #b89640;
-      --bg:      #f7f6f3;
-      --card:    #ffffff;
-      --border:  #e2ddd6;
-      --text:    #1a1a2e;
-      --muted:   #6b6878;
-      --success: #2e7d32;
-      --error:   #c0392b;
-      --teal:    #0a6c74;
-      --blue:    #1a56a0;
-      --radius:  8px;
-    }
+:root {
+  --navy: #0f2047;
+  --gold: #d4b772;
+  --gold-dk: #b89640;
+  --bg: #f7f6f3;
+  --card: #ffffff;
+  --border: #e2ddd6;
+  --text: #1a1a2e;
+  --muted: #6b6878;
+  --success: #2e7d32;
+  --error: #c0392b;
+  --teal: #0a6c74;
+  --blue: #1a56a0;
+  --radius: 8px;
+}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.5; min-height: 100vh; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Header ── */
-    .header { background: #0d0d0d; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--gold); }
-    .header-logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-    .header-wordmark { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.18em; color: #ffffff; text-transform: uppercase; }
-    .header-sub { font-size: 9px; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; margin-top: 1px; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.5; min-height: 100vh; }
 
-    /* ── Randall Bar ── */
-    .randall-bar { background: #0d0d0d; border-bottom: 1px solid #2a2a2a; padding: 7px 16px; display: flex; align-items: center; gap: 9px; }
-    .randall-photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center top; border: 1.5px solid var(--gold); flex-shrink: 0; }
-    .randall-name { font-size: 11px; font-weight: 600; color: #ffffff; }
-    .randall-title { font-size: 9px; color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 1px; }
-    .randall-badge { font-size: 9px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 4px; padding: 2px 6px; margin-left: auto; white-space: nowrap; }
+/* ── Header ── */
+.header { background: #0d0d0d; padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--gold); }
+.header-logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.header-wordmark { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 0.18em; color: #ffffff; text-transform: uppercase; }
+.header-sub { font-size: 9px; color: var(--gold); letter-spacing: 0.14em; text-transform: uppercase; margin-top: 1px; }
 
-    /* ── API Key ── */
-    #apiKeySection { background: var(--card); border-bottom: 1px solid var(--border); padding: 10px 16px; }
-    .api-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
-    .api-row { display: flex; gap: 6px; }
-    .api-input { flex: 1; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 8px; font-size: 12px; font-family: monospace; color: var(--text); background: var(--bg); outline: none; }
-    .api-input:focus { border-color: var(--gold); }
-    .btn-save-key { background: #0d0d0d; color: var(--gold); border: 1px solid var(--gold); border-radius: var(--radius); padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; }
-    .btn-save-key:hover { background: var(--gold); color: #0d0d0d; }
-    .key-saved { display: none; color: var(--success); font-size: 11px; margin-top: 4px; }
+/* ── User Bar (formerly Randall Bar — now dynamic) ── */
+.user-bar { background: #0d0d0d; border-bottom: 1px solid #2a2a2a; padding: 7px 16px; display: flex; align-items: center; gap: 9px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold); border: 1.5px solid var(--gold); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #0d0d0d; font-size: 13px; }
+.randall-photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: center top; border: 1.5px solid var(--gold); flex-shrink: 0; }
+.user-name { font-size: 11px; font-weight: 600; color: #ffffff; }
+.user-title { font-size: 9px; color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 1px; }
+.user-badge { font-size: 9px; background: #1a1a1a; border: 1px solid #333; color: #888; border-radius: 4px; padding: 2px 6px; margin-left: auto; white-space: nowrap; }
 
-    /* ── Main ── */
-    .main { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
-    .section-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 7px; }
+/* ── API Key ── */
+#apiKeySection { background: var(--card); border-bottom: 1px solid var(--border); padding: 10px 16px; }
+.api-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+.api-row { display: flex; gap: 6px; }
+.api-input { flex: 1; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 8px; font-size: 12px; font-family: monospace; color: var(--text); background: var(--bg); outline: none; }
+.api-input:focus { border-color: var(--gold); }
+.btn-save-key { background: #0d0d0d; color: var(--gold); border: 1px solid var(--gold); border-radius: var(--radius); padding: 6px 12px; font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; }
+.btn-save-key:hover { background: var(--gold); color: #0d0d0d; }
+.key-saved { display: none; color: var(--success); font-size: 11px; margin-top: 4px; }
 
-    /* ── Tone Grid ── */
-    .axis-group { display: flex; flex-direction: column; gap: 6px; }
-    .axis-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
-    .axis-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-    .axis-btn {
-      background: var(--card); border: 1.5px solid var(--border);
-      border-radius: var(--radius); padding: 9px 6px;
-      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
-      color: var(--text); cursor: pointer; text-align: center;
-      transition: border-color 0.15s, background 0.15s; line-height: 1.3;
-    }
-    .axis-btn:hover { border-color: var(--gold); background: #fdf9ee; }
-    .axis-btn.active-warmth { border-color: var(--gold); background: #fdf5da; color: #0d0d0d; font-weight: 700; }
-    .axis-btn.active-length { border-color: var(--navy); background: #e8ecf4; color: var(--navy); font-weight: 700; }
+/* ── Main ── */
+.main { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.section-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 7px; }
 
-    /* ── Toggle Rows ── */
-    .toggle-row { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 9px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none; }
-    .toggle-row.active-teal { border-color: var(--teal); background: #f0fafb; }
-    .toggle-row.active-blue { border-color: var(--blue); background: #f0f5fc; }
+/* ── Tone Grid ── */
+.axis-group { display: flex; flex-direction: column; gap: 6px; }
+.axis-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+.axis-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.axis-btn {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 9px 6px;
+  font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+  color: var(--text); cursor: pointer; text-align: center;
+  transition: border-color 0.15s, background 0.15s; line-height: 1.3;
+}
+.axis-btn:hover { border-color: var(--gold); background: #fdf9ee; }
+.axis-btn.active-warmth { border-color: var(--gold); background: #fdf5da; color: #0d0d0d; font-weight: 700; }
+.axis-btn.active-length { border-color: var(--navy); background: #e8ecf4; color: var(--navy); font-weight: 700; }
 
-    .toggle-wrap { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
-    .toggle-track { position: absolute; inset: 0; background: #ccc; border-radius: 18px; transition: background 0.2s; }
-    .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
-    .toggle-wrap.on-teal .toggle-track { background: var(--teal); }
-    .toggle-wrap.on-blue .toggle-track { background: var(--blue); }
-    .toggle-wrap.on-teal .toggle-thumb,
-    .toggle-wrap.on-blue .toggle-thumb { transform: translateX(16px); }
-    .toggle-title { font-size: 12px; font-weight: 600; color: var(--navy); }
-    .toggle-sub   { font-size: 10px; color: var(--muted); margin-top: 1px; }
+/* ── Toggle Rows ── */
+.toggle-row { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 9px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none; }
+.toggle-row.active-teal { border-color: var(--teal); background: #f0fafb; }
+.toggle-row.active-blue { border-color: var(--blue); background: #f0f5fc; }
+.toggle-wrap { position: relative; width: 34px; height: 18px; flex-shrink: 0; }
+.toggle-track { position: absolute; inset: 0; background: #ccc; border-radius: 18px; transition: background 0.2s; }
+.toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+.toggle-wrap.on-teal .toggle-track { background: var(--teal); }
+.toggle-wrap.on-blue .toggle-track { background: var(--blue); }
+.toggle-wrap.on-teal .toggle-thumb,
+.toggle-wrap.on-blue .toggle-thumb { transform: translateX(16px); }
+.toggle-title { font-size: 12px; font-weight: 600; color: var(--navy); }
+.toggle-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
-    /* ── Textarea ── */
-    .custom-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text); background: var(--card); resize: vertical; min-height: 50px; outline: none; }
-    .custom-textarea:focus { border-color: var(--gold); }
+/* ── Textarea ── */
+.custom-textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text); background: var(--card); resize: vertical; min-height: 50px; outline: none; }
+.custom-textarea:focus { border-color: var(--gold); }
 
-    /* ── Action Buttons ── */
-    .action-row { display: flex; gap: 8px; align-items: center; }
-    .btn-revise { flex: 1; background: var(--gold); color: #0d0d0d; border: none; border-radius: var(--radius); padding: 11px 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
-    .btn-revise:hover { background: #e2c87a; }
-    .btn-revise:disabled { background: #ccc; color: #888; cursor: not-allowed; }
-    .btn-draft-guess { flex: 1; background: #0d0d0d; color: var(--gold); border: 1.5px solid var(--gold); border-radius: var(--radius); padding: 11px 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s, color 0.15s; }
-    .btn-draft-guess:hover { background: var(--gold); color: #0d0d0d; }
-    .btn-draft-guess:disabled { background: #aaa; border-color: #aaa; color: #fff; cursor: not-allowed; }
-    .draft-ready { display: none; font-size: 10px; font-weight: 700; color: var(--success); background: #e8f5e9; border: 1px solid var(--success); border-radius: 4px; padding: 2px 7px; white-space: nowrap; margin-left: auto; }
+/* ── Action Buttons ── */
+.action-row { display: flex; gap: 8px; align-items: center; }
+.btn-revise { flex: 1; background: var(--gold); color: #0d0d0d; border: none; border-radius: var(--radius); padding: 11px 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+.btn-revise:hover { background: #e2c87a; }
+.btn-revise:disabled { background: #ccc; color: #888; cursor: not-allowed; }
+.btn-draft-guess { flex: 1; background: #0d0d0d; color: var(--gold); border: 1.5px solid var(--gold); border-radius: var(--radius); padding: 11px 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.btn-draft-guess:hover { background: var(--gold); color: #0d0d0d; }
+.btn-draft-guess:disabled { background: #aaa; border-color: #aaa; color: #fff; cursor: not-allowed; }
+.draft-ready { display: none; font-size: 10px; font-weight: 700; color: var(--success); background: #e8f5e9; border: 1px solid var(--success); border-radius: 4px; padding: 2px 7px; white-space: nowrap; margin-left: auto; }
 
-    /* ── Status ── */
-    #statusBar { display: none; background: #0d0d0d; color: rgba(255,255,255,0.9); border: 1px solid #333; border-radius: var(--radius); padding: 10px 14px; align-items: center; gap: 10px; }
-    .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #statusMsg { font-size: 11px; }
+/* ── Status ── */
+#statusBar { display: none; background: #0d0d0d; color: rgba(255,255,255,0.9); border: 1px solid #333; border-radius: var(--radius); padding: 10px 14px; align-items: center; gap: 10px; }
+.spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#statusMsg { font-size: 11px; }
 
-    /* ── Research Steps ── */
-    #researchSteps { display: none; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: var(--radius); padding: 10px 12px; }
-    .step { font-size: 11px; color: #555; padding: 3px 0; display: flex; align-items: center; gap: 8px; }
-    .step.done   { color: var(--success); }
-    .step.active { color: var(--gold); font-weight: 600; }
-    .step.skip   { display: none; }
-    .step-icon   { width: 14px; text-align: center; flex-shrink: 0; }
+/* ── Research Steps ── */
+#researchSteps { display: none; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: var(--radius); padding: 10px 12px; }
+.step { font-size: 11px; color: #555; padding: 3px 0; display: flex; align-items: center; gap: 8px; }
+.step.done { color: var(--success); }
+.step.active { color: var(--gold); font-weight: 600; }
+.step.skip { display: none; }
+.step-icon { width: 14px; text-align: center; flex-shrink: 0; }
 
-    /* ── Result ── */
-    #resultSection { display: none; }
-    .result-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
-    .result-tag { background: var(--teal); color: #fff; border-radius: 4px; padding: 1px 6px; font-size: 9px; text-transform: uppercase; }
-    #revisedText { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; font-size: 12px; line-height: 1.6; color: var(--text); white-space: pre-wrap; max-height: 220px; overflow-y: auto; }
-    .result-actions { display: flex; gap: 8px; }
-    .btn-replace { flex: 1; background: #0d0d0d; color: var(--gold); border: 1.5px solid var(--gold); border-radius: var(--radius); padding: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s, color 0.15s; }
-    .btn-replace:hover { background: var(--gold); color: #0d0d0d; }
-    .btn-discard { background: var(--card); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
-    .btn-discard:hover { border-color: var(--error); color: var(--error); }
+/* ── Result ── */
+#resultSection { display: none; }
+.result-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+.result-tag { background: var(--teal); color: #fff; border-radius: 4px; padding: 1px 6px; font-size: 9px; text-transform: uppercase; }
+#revisedText { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; font-size: 12px; line-height: 1.4; color: var(--text); white-space: pre-wrap; max-height: 220px; overflow-y: auto; }
+.result-actions { display: flex; gap: 8px; }
+.btn-replace { flex: 1; background: #0d0d0d; color: var(--gold); border: 1.5px solid var(--gold); border-radius: var(--radius); padding: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.btn-replace:hover { background: var(--gold); color: #0d0d0d; }
+.btn-discard { background: var(--card); color: var(--muted); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+.btn-discard:hover { border-color: var(--error); color: var(--error); }
 
-    /* ── Toast ── */
-    #toast { position: fixed; top: 78px; left: 14px; right: 14px; background: #0d0d0d; color: var(--gold); border: 1px solid var(--gold); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; display: none; z-index: 999; text-align: center; }
-    #toast.error   { background: var(--error);  color: #fff; border-color: var(--error); }
-    #toast.success { background: var(--success); color: #fff; border-color: var(--success); }
-  </style>
+/* ── Toast ── */
+#toast { position: fixed; top: 78px; left: 14px; right: 14px; background: #0d0d0d; color: var(--gold); border: 1px solid var(--gold); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; display: none; z-index: 999; text-align: center; }
+#toast.error { background: var(--error); color: #fff; border-color: var(--error); }
+#toast.success { background: var(--success); color: #fff; border-color: var(--success); }
+</style>
 </head>
 <body>
 
@@ -140,14 +142,14 @@
   </div>
 </div>
 
-<!-- Randall Bar -->
-<div class="randall-bar">
-  <div style="width:32px;height:32px;border-radius:50%;background:var(--gold);border:1.5px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#0d0d0d;font-size:13px;">R</div>
+<!-- Randall Bar (Vistamark's AI assistant persona — fixed for all users) -->
+<div class="user-bar">
+  <img class="randall-photo" id="randallPhoto" src="https://mrrvista.github.io/vistamark-addin/randall.jpg" alt="Randall Stephens"/>
   <div>
-    <div class="randall-name">Randall Stephens</div>
-    <div class="randall-title">Senior Operations Analyst</div>
+    <div class="user-name">Randall Stephens</div>
+    <div class="user-title">Vistamark AI Assistant</div>
   </div>
-  <div class="randall-badge">CRM &middot; LinkedIn &middot; Web</div>
+  <div class="user-badge">CRM &middot; LinkedIn &middot; Web</div>
 </div>
 
 <!-- API Key -->
@@ -167,18 +169,18 @@
   <div class="axis-group">
     <div class="axis-label">Warmth</div>
     <div class="axis-row">
-      <button class="axis-btn active-warmth" id="wb-warm"      onclick="selectAxis(this,'warmth','warm')">&#129309; Warm</button>
-      <button class="axis-btn"              id="wb-neutral"    onclick="selectAxis(this,'warmth','neutral')">&#128188; Professional</button>
-      <button class="axis-btn"              id="wb-assertive"  onclick="selectAxis(this,'warmth','assertive')">&#128170; Assertive</button>
+      <button class="axis-btn active-warmth" id="wb-warm" onclick="selectAxis(this,'warmth','warm')">&#129309; Warm</button>
+      <button class="axis-btn" id="wb-neutral" onclick="selectAxis(this,'warmth','neutral')">&#128188; Professional</button>
+      <button class="axis-btn" id="wb-assertive" onclick="selectAxis(this,'warmth','assertive')">&#128170; Assertive</button>
     </div>
   </div>
 
   <div class="axis-group">
     <div class="axis-label">Length</div>
     <div class="axis-row">
-      <button class="axis-btn"               id="lb-pithy"  onclick="selectAxis(this,'length','pithy')">&#9986; Pithy</button>
-      <button class="axis-btn active-length" id="lb-medium" onclick="selectAxis(this,'length','medium')">&#8652; Medium</button>
-      <button class="axis-btn"               id="lb-long"   onclick="selectAxis(this,'length','long')">&#128221; Long</button>
+      <button class="axis-btn active-length" id="lb-pithy" onclick="selectAxis(this,'length','pithy')">&#9986; Pithy</button>
+      <button class="axis-btn" id="lb-medium" onclick="selectAxis(this,'length','medium')">&#8652; Medium</button>
+      <button class="axis-btn" id="lb-long" onclick="selectAxis(this,'length','long')">&#128221; Long</button>
     </div>
   </div>
 
@@ -208,8 +210,8 @@
 
   <!-- Buttons -->
   <div class="action-row">
-    <button class="btn-draft-guess" id="draftGuessBtn" onclick="draftGuess()">&#128203; Draft Guess Reply</button>
-    <button class="btn-revise"      id="reviseBtn"     onclick="reviseEmail()">&#10022; Revise Draft</button>
+    <button class="btn-draft-guess" id="draftGuessBtn" onclick="draftGuess()">&#128203; Guess Draft</button>
+    <button class="btn-revise" id="reviseBtn" onclick="reviseEmail()">&#10022; Revise Draft</button>
     <span class="draft-ready" id="draftReadyBadge">&#10003; Ready</span>
   </div>
 
@@ -252,436 +254,530 @@
 <div id="toast"></div>
 
 <script>
-  // ── Config ────────────────────────────────────────────────────────────────
-  // All API calls go through the Vercel proxy — token never touches the browser.
-  var CLAUDE_PROXY_URL = 'https://vistamark-wealthbox.vercel.app/api/claude';
+// ── Config ────────────────────────────────────────────────────────────────
+// All API calls go through the Vercel proxy — token never touches the browser.
+var CLAUDE_PROXY_URL = 'https://vistamark-wealthbox.vercel.app/api/claude';
 
-  // ── State ─────────────────────────────────────────────────────────────────
-  var apiKey          = '';
-  var selectedWarmth  = 'warm';
-  var selectedLength  = 'medium';
-  var revisedBody     = '';
-  var revisedHtml     = '';
-  var useWealthbox    = false;
-  var useWebSearch    = false;
+// ── State ─────────────────────────────────────────────────────────────────
+var apiKey = '';
+var selectedWarmth = 'warm';
+var selectedLength = 'pithy';
+var revisedBody = '';
+var revisedHtml = '';
+var useWealthbox = false;
+var useWebSearch = false;
 
-  // ── Tone maps ─────────────────────────────────────────────────────────────
-  var WARMTH_PROMPTS = {
-    warm:      'Write with genuine warmth and personal engagement. Let care and relationship-building come through naturally.',
-    neutral:   'Write in a polished, professional tone. Confident and clear — business-appropriate without being cold.',
-    assertive: 'Write directly and confidently. State positions clearly without hedging or over-apologizing.'
-  };
-  var LENGTH_PROMPTS = {
-    pithy:  'Be very concise — 2 to 4 sentences maximum. Cut ruthlessly.',
-    medium: 'Use a natural, appropriate length — not too short, not too long.',
-    long:   'Be thorough. Engage substantively with the content. Build context and rapport.'
-  };
+// Sender identity (populated from Outlook profile on load)
+var senderFullName  = 'Vistamark User';
+var senderFirstName = 'Matt';
 
-  function getToneInstruction() {
-    return WARMTH_PROMPTS[selectedWarmth] + ' ' + LENGTH_PROMPTS[selectedLength];
+// ── Tone maps ─────────────────────────────────────────────────────────────
+var WARMTH_PROMPTS = {
+  warm:      'Write with genuine warmth and personal engagement. Let care and relationship-building come through naturally.',
+  neutral:   'Write in a polished, professional tone. Confident and clear, business-appropriate without being cold.',
+  assertive: 'Write directly and confidently. State positions clearly without hedging or over-apologizing.'
+};
+var LENGTH_PROMPTS = {
+  pithy:  'Be very concise. 2 to 4 sentences maximum. Cut ruthlessly.',
+  medium: 'Use a natural, appropriate length. Not too short, not too long.',
+  long:   'Be thorough. Engage substantively with the content. Build context and rapport.'
+};
+
+function getToneInstruction() {
+  return WARMTH_PROMPTS[selectedWarmth] + ' ' + LENGTH_PROMPTS[selectedLength];
+}
+
+// ── Office Init ────────────────────────────────────────────────────────────
+Office.onReady(function(info) {
+  document.getElementById('statusBar').style.display = 'none';
+  document.getElementById('researchSteps').style.display = 'none';
+  document.getElementById('resultSection').style.display = 'none';
+
+  if (info.host === Office.HostType.Outlook) {
+    populateSenderIdentity();
+
+    var saved = localStorage.getItem('vm_api_key');
+    if (saved) {
+      apiKey = saved;
+      document.getElementById('apiKeyInput').value = saved;
+      document.getElementById('keySavedMsg').style.display = 'block';
+    }
   }
+});
 
-  // ── Office Init ────────────────────────────────────────────────────────────
-  Office.onReady(function(info) {
-    // Hide status bar on load
-    document.getElementById('statusBar').style.display = 'none';
-    document.getElementById('researchSteps').style.display = 'none';
-    document.getElementById('resultSection').style.display = 'none';
-
-    if (info.host === Office.HostType.Outlook) {
-      var saved = localStorage.getItem('vm_api_key');
-      if (saved) {
-        apiKey = saved;
-        document.getElementById('apiKeyInput').value = saved;
-        document.getElementById('keySavedMsg').style.display = 'block';
+// ── Sender identity detection ──────────────────────────────────────────────
+// We only need the signed-in user's first name for the email sign-off.
+// The Randall persona bar is fixed and doesn't change per user.
+function populateSenderIdentity() {
+  try {
+    var profile = Office.context.mailbox && Office.context.mailbox.userProfile;
+    if (profile && profile.displayName) {
+      senderFullName  = profile.displayName.trim();
+      senderFirstName = senderFullName.split(/\s+/)[0];
+    } else if (profile && profile.emailAddress) {
+      // Fallback: derive from local-part of email (e.g. matt.rice@vistamarkllc.com)
+      var local = profile.emailAddress.split('@')[0];
+      var first = local.split(/[._-]/).filter(Boolean)[0];
+      if (first) {
+        senderFirstName = capitalize(first);
+        senderFullName  = senderFirstName;
       }
     }
+  } catch(e) { /* silent — keep defaults */ }
+}
+
+function capitalize(s) {
+  if (!s) return '';
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+// ── API Key ────────────────────────────────────────────────────────────────
+function saveApiKey() {
+  var val = document.getElementById('apiKeyInput').value.trim();
+  if (!val.startsWith('sk-ant')) {
+    showToast('Enter a valid Anthropic API key.', 'error');
+    return;
+  }
+  apiKey = val;
+  localStorage.setItem('vm_api_key', val);
+  document.getElementById('keySavedMsg').style.display = 'block';
+  showToast('API key saved', 'success');
+}
+
+// ── Tone selectors ─────────────────────────────────────────────────────────
+function selectAxis(btn, axis, val) {
+  var activeClass = axis === 'warmth' ? 'active-warmth' : 'active-length';
+  var ids = axis === 'warmth'
+    ? ['wb-warm','wb-neutral','wb-assertive']
+    : ['lb-pithy','lb-medium','lb-long'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) { el.classList.remove('active-warmth'); el.classList.remove('active-length'); }
+  });
+  btn.classList.add(activeClass);
+  if (axis === 'warmth') selectedWarmth = val;
+  else selectedLength = val;
+}
+
+// ── Toggles ────────────────────────────────────────────────────────────────
+function toggleSwitch(which) {
+  if (which === 'wb') {
+    useWealthbox = !useWealthbox;
+    document.getElementById('wbWrap').classList.toggle('on-teal', useWealthbox);
+    document.getElementById('wbRow').classList.toggle('active-teal', useWealthbox);
+  } else {
+    useWebSearch = !useWebSearch;
+    document.getElementById('liWrap').classList.toggle('on-blue', useWebSearch);
+    document.getElementById('liRow').classList.toggle('active-blue', useWebSearch);
+  }
+}
+
+// ── Office helpers ─────────────────────────────────────────────────────────
+function getEmailBody() {
+  return new Promise(function(resolve, reject) {
+    Office.context.mailbox.item.body.getAsync(Office.CoercionType.Text, {}, function(r) {
+      if (r.status === Office.AsyncResultStatus.Succeeded) resolve(r.value || '');
+      else reject(new Error(r.error ? r.error.message : 'Could not read body.'));
+    });
+  });
+}
+
+function getEmailSubject() {
+  return new Promise(function(resolve) {
+    try {
+      var s = Office.context.mailbox.item.subject;
+      if (typeof s === 'string') { resolve(s); return; }
+      s.getAsync(function(r) {
+        resolve(r.status === Office.AsyncResultStatus.Succeeded ? r.value : '');
+      });
+    } catch(e) { resolve(''); }
+  });
+}
+
+function getRecipients() {
+  return new Promise(function(resolve) {
+    try {
+      var item = Office.context.mailbox.item;
+      if (item.to && typeof item.to.getAsync === 'function') {
+        item.to.getAsync(function(r) {
+          resolve(r.status === Office.AsyncResultStatus.Succeeded ? (r.value || []) : []);
+        });
+      } else { resolve([]); }
+    } catch(e) { resolve([]); }
+  });
+}
+
+// ── Plain text → HTML ──────────────────────────────────────────────────────
+// Tight single-spaced output: every non-empty line becomes a <div> with zero
+// margin and normal line-height. Blank lines are dropped entirely — the user
+// can re-add paragraph breaks on review if they want them.
+function plainTextToHtml(text) {
+  if (!text) return '';
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  var lines = text.split('\n')
+    .map(function(l) { return l.trim(); })
+    .filter(function(l) { return l.length > 0; });
+
+  var style = 'margin:0;padding:0;font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.15;';
+  return lines.map(function(line) {
+    return '<div style="' + style + '">' + escapeHtml(line) + '</div>';
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// ── System prompt builder ──────────────────────────────────────────────────
+// Shared across Revise and Draft Guess. Matt's voice applies for every sender;
+// only the sign-off name is dynamic.
+function buildBaseSystemPrompt() {
+  return 'You are an expert business writing assistant for Vistamark Investments LLC, a boutique RIA in Hinsdale, Illinois ($320MM direct AUM, >$20B iCIO/OCIO). Vistamark advises ultra-high-net-worth clients, endowments, foundations, and institutional investors.'
+    + ' Write in the voice of Matt Rice, CFA, CAIA (Managing Partner and CIO of Vistamark): measured, confident, warm but not effusive, with CIO-level authority.'
+    + '\n\nThe sender of this email is ' + senderFullName + '.'
+    + ' End the email with exactly these two lines, and nothing after them:'
+    + '\nBest,'
+    + '\n' + senderFirstName
+    + '\n\nDo not add a title, firm name, phone, email, website, or any other contact information after the sign-off. Vistamark uses a sig-sync email footer that appends all contact and bio information automatically below the body.'
+    + '\n\nFORMATTING RULES (strict):'
+    + '\n- Do NOT use em dashes (the long dash character) anywhere. Ever.'
+    + '\n- Do NOT use en dashes either.'
+    + '\n- Do NOT use a hyphen surrounded by spaces ( - ) as a sentence break or clause joiner. Use commas, periods, colons, or parentheses instead.'
+    + '\n- Avoid common AI-writing tells: "not just X, but Y" constructions, "delve", "tapestry", "navigate" used as a metaphor, "crucial", "landscape" used figuratively.'
+    + '\n- Write single-spaced. Do NOT insert blank lines between paragraphs. Let paragraphs sit on consecutive lines.'
+    + '\n- Return ONLY the email body text. No subject line, no preamble, no explanation, no markdown, no quotation marks wrapping the output.';
+}
+
+// ── callClaude ─────────────────────────────────────────────────────────────
+// Calls the Vercel proxy (/api/claude) which injects the Wealthbox MCP token
+// server-side before forwarding to Anthropic. Token never touches the browser.
+async function callClaude(systemPrompt, userMessage, options) {
+  options = options || {};
+
+  var headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': apiKey,
+    'anthropic-version': '2023-06-01'
+  };
+  if (options.useMCP) {
+    headers['anthropic-beta'] = 'mcp-client-2025-04-04';
+  }
+
+  var reqBody = {
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 4096,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userMessage }]
+  };
+
+  if (options.useMCP) {
+    reqBody.mcp_servers = [{
+      type: 'url',
+      url: 'https://vistamark-wealthbox.vercel.app/api/mcp',
+      name: 'wealthbox'
+    }];
+  }
+
+  if (options.useWebSearch) {
+    reqBody.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  }
+
+  var resp = await fetch(CLAUDE_PROXY_URL, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(reqBody)
   });
 
-  // ── API Key ────────────────────────────────────────────────────────────────
-  function saveApiKey() {
-    var val = document.getElementById('apiKeyInput').value.trim();
-    if (!val.startsWith('sk-ant')) {
-      showToast('Enter a valid Anthropic API key.', 'error');
+  if (!resp.ok) {
+    var errData = await resp.json().catch(function() { return {}; });
+    var msg = (errData.error && errData.error.message) ? errData.error.message : 'API error ' + resp.status;
+    throw new Error(msg);
+  }
+
+  var data = await resp.json();
+  var text = (data.content || [])
+    .filter(function(b) { return b.type === 'text'; })
+    .map(function(b) { return b.text; })
+    .join('')
+    .trim();
+
+  if (!text) {
+    throw new Error('Empty response from Claude. Check your API key.');
+  }
+  return text;
+}
+
+// ── Revise Email ───────────────────────────────────────────────────────────
+async function reviseEmail() {
+  if (!apiKey) { showToast('Enter and save your API key first.', 'error'); return; }
+
+  setUI(true, 'Reading your draft\u2026');
+  document.getElementById('resultSection').style.display = 'none';
+
+  try {
+    var results = await Promise.all([getEmailBody(), getEmailSubject(), getRecipients()]);
+    var body = results[0];
+    var subject = results[1];
+    var recipients = results[2];
+
+    if (!body || body.trim().length < 5) {
+      showToast('Email body appears empty.', 'error');
       return;
     }
-    apiKey = val;
-    localStorage.setItem('vm_api_key', val);
-    document.getElementById('keySavedMsg').style.display = 'block';
-    showToast('API key saved', 'success');
-  }
 
-  // ── Tone selectors ─────────────────────────────────────────────────────────
-  function selectAxis(btn, axis, val) {
-    var activeClass = axis === 'warmth' ? 'active-warmth' : 'active-length';
-    var ids = axis === 'warmth'
-      ? ['wb-warm','wb-neutral','wb-assertive']
-      : ['lb-pithy','lb-medium','lb-long'];
-    ids.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) { el.classList.remove('active-warmth'); el.classList.remove('active-length'); }
-    });
-    btn.classList.add(activeClass);
-    if (axis === 'warmth') selectedWarmth = val;
-    else                   selectedLength  = val;
-  }
+    var recipientStr = recipients.length
+      ? recipients.map(function(r) { return (r.displayName || '') + ' <' + (r.emailAddress || '') + '>'; }).join(', ')
+      : '(unknown recipient)';
 
-  // ── Toggles ────────────────────────────────────────────────────────────────
-  function toggleSwitch(which) {
-    if (which === 'wb') {
-      useWealthbox = !useWealthbox;
-      document.getElementById('wbWrap').classList.toggle('on-teal', useWealthbox);
-      document.getElementById('wbRow').classList.toggle('active-teal', useWealthbox);
-    } else {
-      useWebSearch = !useWebSearch;
-      document.getElementById('liWrap').classList.toggle('on-blue', useWebSearch);
-      document.getElementById('liRow').classList.toggle('active-blue', useWebSearch);
+    var custom = document.getElementById('customInstructions').value.trim();
+
+    var systemPrompt = buildBaseSystemPrompt();
+
+    if (useWealthbox) {
+      systemPrompt += '\n\nBEFORE REVISING: Search Wealthbox CRM for the recipient(s): ' + recipientStr + '. Look for contact records, relationship notes, pipeline status, and any notes about this contact. Use that context to personalize the revision.';
+      setUI(true, 'Searching Wealthbox CRM\u2026');
     }
-  }
-
-  // ── Office helpers ─────────────────────────────────────────────────────────
-  function getEmailBody() {
-    return new Promise(function(resolve, reject) {
-      Office.context.mailbox.item.body.getAsync(Office.CoercionType.Text, {}, function(r) {
-        if (r.status === Office.AsyncResultStatus.Succeeded) resolve(r.value || '');
-        else reject(new Error(r.error ? r.error.message : 'Could not read body.'));
-      });
-    });
-  }
-
-  function getEmailSubject() {
-    return new Promise(function(resolve) {
-      try {
-        var s = Office.context.mailbox.item.subject;
-        if (typeof s === 'string') { resolve(s); return; }
-        s.getAsync(function(r) {
-          resolve(r.status === Office.AsyncResultStatus.Succeeded ? r.value : '');
-        });
-      } catch(e) { resolve(''); }
-    });
-  }
-
-  function getRecipients() {
-    return new Promise(function(resolve) {
-      try {
-        var item = Office.context.mailbox.item;
-        if (item.to && typeof item.to.getAsync === 'function') {
-          item.to.getAsync(function(r) {
-            resolve(r.status === Office.AsyncResultStatus.Succeeded ? (r.value || []) : []);
-          });
-        } else { resolve([]); }
-      } catch(e) { resolve([]); }
-    });
-  }
-
-  // ── Plain text → HTML ──────────────────────────────────────────────────────
-  function plainTextToHtml(text) {
-    if (!text) return '';
-    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    return text.split(/\n\n+/).map(function(p) {
-      var t = p.trim();
-      return t
-        ? '<p style="margin:0 0 10px 0;font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.5;">'
-          + t.replace(/\n/g, '<br>') + '</p>'
-        : '';
-    }).filter(Boolean).join('');
-  }
-
-  // ── callClaude ─────────────────────────────────────────────────────────────
-  // Calls the Vercel proxy (/api/claude) which injects the Wealthbox MCP token
-  // server-side before forwarding to Anthropic. Token never touches the browser.
-  async function callClaude(systemPrompt, userMessage, options) {
-    options = options || {};
-
-    var headers = {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    };
-
-    if (options.useMCP) {
-      headers['anthropic-beta'] = 'mcp-client-2025-04-04';
+    if (useWebSearch) {
+      systemPrompt += '\n\nALSO: Search the web for current professional information about: ' + recipientStr + '. Use relevant findings to personalize the revision.';
+      setUI(true, 'Searching web\u2026');
     }
 
-    var reqBody = {
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userMessage }]
-    };
+    var userPrompt = 'To: ' + recipientStr
+      + '\nSubject: ' + (subject || '(no subject)')
+      + '\n\n' + getToneInstruction()
+      + (custom ? '\n\nAdditional instructions: ' + custom : '')
+      + '\n\nEmail draft:\n---\n' + body.trim()
+      + '\n---\n\nReturn only the revised email body.';
 
-    // Signal the proxy to inject the MCP server config with the server-side token.
-    // The proxy replaces this stub with the real authorization_token from env vars.
-    if (options.useMCP) {
-      reqBody.mcp_servers = [{
-        type: 'url',
-        url: 'https://vistamark-wealthbox.vercel.app/api/mcp',
-        name: 'wealthbox'
-      }];
-    }
+    setUI(true, 'Claude is revising\u2026');
 
-    // Web search is executed server-side by Anthropic.
-    if (options.useWebSearch) {
-      reqBody.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-    }
-
-    var resp = await fetch(CLAUDE_PROXY_URL, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify(reqBody)
+    revisedBody = await callClaude(systemPrompt, userPrompt, {
+      useMCP: useWealthbox,
+      useWebSearch: useWebSearch
     });
 
-    if (!resp.ok) {
-      var errData = await resp.json().catch(function() { return {}; });
-      var msg = (errData.error && errData.error.message) ? errData.error.message : 'API error ' + resp.status;
-      throw new Error(msg);
-    }
+    revisedHtml = plainTextToHtml(revisedBody);
 
-    var data = await resp.json();
-
-    var text = (data.content || [])
-      .filter(function(b) { return b.type === 'text'; })
-      .map(function(b) { return b.text; })
-      .join('')
-      .trim();
-
-    if (!text) {
-      throw new Error('Empty response from Claude. Check your API key.');
-    }
-
-    return text;
-  }
-
-  // ── Revise Email ───────────────────────────────────────────────────────────
-  async function reviseEmail() {
-    if (!apiKey) { showToast('Enter and save your API key first.', 'error'); return; }
-
-    setUI(true, 'Reading your draft\u2026');
-    document.getElementById('resultSection').style.display = 'none';
-
-    try {
-      var results   = await Promise.all([getEmailBody(), getEmailSubject(), getRecipients()]);
-      var body      = results[0];
-      var subject   = results[1];
-      var recipients = results[2];
-
-      if (!body || body.trim().length < 5) {
-        showToast('Email body appears empty.', 'error');
-        return;
-      }
-
-      var recipientStr = recipients.length
-        ? recipients.map(function(r) { return (r.displayName || '') + ' <' + (r.emailAddress || '') + '>'; }).join(', ')
-        : '(unknown recipient)';
-
-      var custom = document.getElementById('customInstructions').value.trim();
-
-      var systemPrompt = 'You are an expert business writing assistant for Matt Rice, CFA, CAIA \u2014 Managing Partner and CIO of Vistamark Investments LLC, a boutique RIA in Hinsdale, Illinois. Matt advises ultra-high-net-worth clients, endowments, foundations, and institutional investors.\n\nReturn ONLY the revised email body \u2014 no subject line, no preamble, no explanation, no markdown. Output clean plain text with blank lines between paragraphs. Never add a sign-off or signature block unless one was already present.';
-
-      if (useWealthbox) {
-        systemPrompt += '\n\nBEFORE REVISING: Search Wealthbox CRM for the recipient(s): ' + recipientStr + '. Look for contact records, relationship notes, pipeline status, and any notes about this contact. Use that context to personalize the revision.';
-        setUI(true, 'Searching Wealthbox CRM\u2026');
-      }
-
-      if (useWebSearch) {
-        systemPrompt += '\n\nALSO: Search the web for current professional information about: ' + recipientStr + '. Use relevant findings to personalize the revision.';
-        setUI(true, 'Searching web\u2026');
-      }
-
-      var userPrompt = 'To: ' + recipientStr
-        + '\nSubject: ' + (subject || '(no subject)')
-        + '\n\n' + getToneInstruction()
-        + (custom ? '\n\nAdditional instructions: ' + custom : '')
-        + '\n\nEmail draft:\n---\n' + body.trim()
-        + '\n---\n\nReturn only the revised email body.';
-
-      setUI(true, 'Claude is revising\u2026');
-
-      revisedBody = await callClaude(systemPrompt, userPrompt, {
-        useMCP: useWealthbox,
-        useWebSearch: useWebSearch
-      });
-
-      revisedHtml = plainTextToHtml(revisedBody);
-      document.getElementById('revisedText').textContent = revisedBody;
-      document.getElementById('resultTag').style.display = 'none';
-      document.getElementById('draftReadyBadge').style.display = 'none';
-      document.getElementById('resultSection').style.display = 'block';
-      showToast('Revision ready!', 'success');
-
-    } catch(err) {
-      showToast('Error: ' + err.message, 'error');
-    } finally {
-      setUI(false);
-    }
-  }
-
-  // ── Draft Guess ────────────────────────────────────────────────────────────
-  async function draftGuess() {
-    if (!apiKey) { showToast('Enter and save your API key first.', 'error'); return; }
-
-    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('revisedText').textContent = revisedBody;
+    document.getElementById('resultTag').style.display = 'none';
     document.getElementById('draftReadyBadge').style.display = 'none';
-    setStepVisibility();
-    document.getElementById('researchSteps').style.display = 'block';
-    setAllBtns(true);
-    setStep('step-email', 'active');
+    document.getElementById('resultSection').style.display = 'block';
+    showToast('Revision ready!', 'success');
+  } catch(err) {
+    showToast('Error: ' + err.message, 'error');
+  } finally {
+    setUI(false);
+  }
+}
 
-    try {
-      var results    = await Promise.all([getEmailBody(), getEmailSubject(), getRecipients()]);
-      var body       = results[0];
-      var subject    = results[1];
-      var recipients = results[2];
+// ── Draft Guess ────────────────────────────────────────────────────────────
+async function draftGuess() {
+  if (!apiKey) { showToast('Enter and save your API key first.', 'error'); return; }
 
-      var recipientStr   = recipients.length
-        ? recipients.map(function(r) { return (r.displayName || '') + ' <' + (r.emailAddress || '') + '>'; }).join(', ')
-        : '(unknown)';
-      var recipientNames = recipients.map(function(r) { return r.displayName; }).filter(Boolean).join(', ') || 'the recipient';
-      var custom         = document.getElementById('customInstructions').value.trim();
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('draftReadyBadge').style.display = 'none';
+  setStepVisibility();
+  document.getElementById('researchSteps').style.display = 'block';
+  setAllBtns(true);
+  setStep('step-email', 'active');
 
-      setStep('step-email', 'done');
+  try {
+    var results = await Promise.all([getEmailBody(), getEmailSubject(), getRecipients()]);
+    var body = results[0];
+    var subject = results[1];
+    var recipients = results[2];
 
-      var researchInstructions = '';
-      if (useWealthbox) {
-        setStep('step-wealthbox', 'active');
-        researchInstructions += '\n\n1. WEALTHBOX CRM: Search for ' + recipientStr + '. Find contact record, relationship type, last interaction, pipeline stage, and any notes.';
-      }
-      if (useWebSearch) {
-        var n = useWealthbox ? '2' : '1';
-        setStep('step-web', 'active');
-        researchInstructions += '\n\n' + n + '. WEB SEARCH: Search for "' + recipientNames + '" to find current role, firm, and recent news.';
-      }
+    var recipientStr = recipients.length
+      ? recipients.map(function(r) { return (r.displayName || '') + ' <' + (r.emailAddress || '') + '>'; }).join(', ')
+      : '(unknown)';
+    var recipientNames = recipients.map(function(r) { return r.displayName; }).filter(Boolean).join(', ') || 'the recipient';
 
-      setStep('step-draft', 'active');
+    var custom = document.getElementById('customInstructions').value.trim();
 
-      var systemPrompt = 'You are a business writing assistant for Matt Rice, CFA, CAIA \u2014 Managing Partner and CIO of Vistamark Investments LLC ($320MM direct AUM, >$20B iCIO/OCIO). Draft a complete, professional email reply in Matt\u2019s voice: measured, confident, warm but not effusive, CIO-level authority.'
-        + (researchInstructions ? '\n\nBefore drafting, conduct this research:' + researchInstructions : '')
-        + '\n\nOutput: ONLY the email body. No subject. No preamble. Clean plain text, blank lines between paragraphs.'
-        + (custom ? '\n\nAdditional instructions: ' + custom : '');
+    setStep('step-email', 'done');
 
-      var userPrompt = 'Recipient(s): ' + recipientStr
-        + '\nSubject: ' + (subject || '(no subject)')
-        + '\n\nEmail thread:\n---\n' + (body ? body.trim() : '(no body \u2014 new outbound email)')
-        + '\n---\n\n'
-        + (researchInstructions
+    var researchInstructions = '';
+    if (useWealthbox) {
+      setStep('step-wealthbox', 'active');
+      researchInstructions += '\n\n1. WEALTHBOX CRM: Search for ' + recipientStr + '. Find contact record, relationship type, last interaction, pipeline stage, and any notes.';
+    }
+    if (useWebSearch) {
+      var n = useWealthbox ? '2' : '1';
+      setStep('step-web', 'active');
+      researchInstructions += '\n\n' + n + '. WEB SEARCH: Search for "' + recipientNames + '" to find current role, firm, and recent news.';
+    }
+
+    setStep('step-draft', 'active');
+
+    var systemPrompt = buildBaseSystemPrompt()
+      + (researchInstructions ? '\n\nBefore drafting, conduct this research:' + researchInstructions : '')
+      + (custom ? '\n\nAdditional instructions: ' + custom : '');
+
+    var userPrompt = 'Recipient(s): ' + recipientStr
+      + '\nSubject: ' + (subject || '(no subject)')
+      + '\n\nEmail thread:\n---\n' + (body ? body.trim() : '(no body, new outbound email)')
+      + '\n---\n\n'
+      + (researchInstructions
           ? 'Research ' + recipientNames + ' as instructed, then draft the most informed reply possible.'
           : 'Draft an appropriate reply based on the email thread above.');
 
-      revisedBody = await callClaude(systemPrompt, userPrompt, {
-        useMCP: useWealthbox,
-        useWebSearch: useWebSearch
-      });
+    revisedBody = await callClaude(systemPrompt, userPrompt, {
+      useMCP: useWealthbox,
+      useWebSearch: useWebSearch
+    });
 
-      if (useWealthbox) setStep('step-wealthbox', 'done');
-      if (useWebSearch) setStep('step-web', 'done');
-      setStep('step-draft', 'done');
+    if (useWealthbox) setStep('step-wealthbox', 'done');
+    if (useWebSearch)  setStep('step-web', 'done');
+    setStep('step-draft', 'done');
 
-      revisedHtml = plainTextToHtml(revisedBody);
-      document.getElementById('revisedText').textContent = revisedBody;
-      document.getElementById('resultTag').style.display = 'inline';
-      document.getElementById('resultSection').style.display = 'block';
-      document.getElementById('draftReadyBadge').style.display = 'inline';
+    revisedHtml = plainTextToHtml(revisedBody);
 
-    } catch(err) {
-      showToast('Error: ' + err.message, 'error');
-    } finally {
-      document.getElementById('researchSteps').style.display = 'none';
-      resetSteps();
-      setAllBtns(false);
-    }
+    document.getElementById('revisedText').textContent = revisedBody;
+    document.getElementById('resultTag').style.display = 'inline';
+    document.getElementById('resultSection').style.display = 'block';
+    document.getElementById('draftReadyBadge').style.display = 'inline';
+  } catch(err) {
+    showToast('Error: ' + err.message, 'error');
+  } finally {
+    document.getElementById('researchSteps').style.display = 'none';
+    resetSteps();
+    setAllBtns(false);
   }
+}
 
-  // ── Replace Body (preserves quoted thread) ─────────────────────────────────
-  function replaceBody() {
-    if (!revisedHtml) { showToast('No revision to apply yet.', 'error'); return; }
+// ── Reply boundary detection ───────────────────────────────────────────────
+// Finds where the quoted thread starts in the current body HTML. Returns the
+// character index of the first match (the substring FROM this index preserves
+// the gray <hr> divider and everything below it). Returns -1 if no marker.
+function findReplyBoundary(html) {
+  if (!html) return -1;
 
-    Office.context.mailbox.item.body.getAsync(Office.CoercionType.Html, {}, function(readResult) {
-      if (readResult.status !== Office.AsyncResultStatus.Succeeded) {
-        showToast('Could not read body: ' + ((readResult.error && readResult.error.message) || 'Unknown error'), 'error');
-        return;
+  var patterns = [
+    // Outlook desktop (classic) — wraps HR + From/Sent/To/Subject headers
+    /<div[^>]+id=["']divRplyFwdMsg["'][^>]*>/i,
+    /<div[^>]+id=["']x_divRplyFwdMsg["'][^>]*>/i,
+    // Outlook new / OWA — appendonsend wraps thread content
+    /<div[^>]+id=["']appendonsend["'][^>]*>/i,
+    /<div[^>]+id=["']x_appendonsend["'][^>]*>/i,
+    // Classic Outlook message header class
+    /<div[^>]+class=["'][^"']*OutlookMessageHeader[^"']*["'][^>]*>/i,
+    // The gray horizontal rule itself
+    /<hr\b[^>]*>/i,
+    // Gmail-style and other web client quote containers
+    /<blockquote\b[^>]*>/i,
+    // Bolded "From:" line (common in Outlook quoting)
+    /<(?:div|p)[^>]*>\s*<(?:b|strong)[^>]*>\s*From:/i,
+    // Last-ditch: any element immediately followed by "From: name@domain"
+    /<[^>]+>\s*From:\s*[^<\n]*@[^<\n]+/i
+  ];
+
+  for (var i = 0; i < patterns.length; i++) {
+    var m = html.match(patterns[i]);
+    if (m) return html.indexOf(m[0]);
+  }
+  return -1;
+}
+
+// ── Replace Body (preserves quoted thread + gray divider) ──────────────────
+function replaceBody() {
+  if (!revisedHtml) { showToast('No revision to apply yet.', 'error'); return; }
+
+  Office.context.mailbox.item.body.getAsync(Office.CoercionType.Html, {}, function(readResult) {
+    if (readResult.status !== Office.AsyncResultStatus.Succeeded) {
+      showToast('Could not read body: ' + ((readResult.error && readResult.error.message) || 'Unknown error'), 'error');
+      return;
+    }
+
+    var currentHtml = readResult.value || '';
+    var boundary = findReplyBoundary(currentHtml);
+
+    var newBody;
+    if (boundary >= 0) {
+      // Preserve everything from the boundary onwards — this includes the
+      // gray <hr> divider and the entire quoted thread below.
+      newBody = revisedHtml + currentHtml.substring(boundary);
+    } else {
+      // No thread marker found. Decide based on existing content weight:
+      // - Light existing content (just a cursor area on a new email) → safe to replace.
+      // - Substantial existing content (reply with unfamiliar markup) → prepend
+      //   instead of overwriting, so nothing gets silently nuked.
+      var existingText = currentHtml.replace(/<[^>]*>/g, '').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+      if (existingText.length > 40) {
+        newBody = revisedHtml + currentHtml;
+      } else {
+        newBody = revisedHtml;
       }
+    }
 
-      var currentHtml  = readResult.value || '';
-      var quotedThread = '';
-
-      // Try to preserve quoted thread / reply history
-      var patterns = [
-        /<div[^>]+id=["']divRplyFwdMsg["'][^>]*>/i,
-        /<hr\b[^>]*>/i,
-        /<blockquote\b[^>]*>/i,
-        /<[^>]+>[\s]*From:[\s]/i
-      ];
-      for (var i = 0; i < patterns.length; i++) {
-        var match = currentHtml.match(patterns[i]);
-        if (match) { quotedThread = currentHtml.substring(currentHtml.indexOf(match[0])); break; }
-      }
-
-      var newBody = revisedHtml + (quotedThread ? '\n' + quotedThread : '');
-
-      Office.context.mailbox.item.body.setAsync(newBody, { coercionType: Office.CoercionType.Html }, function(writeResult) {
+    Office.context.mailbox.item.body.setAsync(
+      newBody,
+      { coercionType: Office.CoercionType.Html },
+      function(writeResult) {
         if (writeResult.status === Office.AsyncResultStatus.Succeeded) {
           showToast('Email body updated!', 'success');
           discardRevision();
         } else {
           showToast('Could not update body: ' + ((writeResult.error && writeResult.error.message) || 'Unknown error'), 'error');
         }
-      });
-    });
-  }
+      }
+    );
+  });
+}
 
-  function discardRevision() {
-    revisedBody = revisedHtml = '';
-    document.getElementById('resultSection').style.display = 'none';
-    document.getElementById('revisedText').textContent = '';
-    document.getElementById('customInstructions').value = '';
-    document.getElementById('draftReadyBadge').style.display = 'none';
-  }
+function discardRevision() {
+  revisedBody = revisedHtml = '';
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('revisedText').textContent = '';
+  document.getElementById('customInstructions').value = '';
+  document.getElementById('draftReadyBadge').style.display = 'none';
+}
 
-  // ── Step helpers ───────────────────────────────────────────────────────────
-  function setStepVisibility() {
-    document.getElementById('step-wealthbox').className = 'step' + (useWealthbox  ? '' : ' skip');
-    document.getElementById('step-web').className       = 'step' + (useWebSearch ? '' : ' skip');
-    document.getElementById('step-email').className     = 'step';
-    document.getElementById('step-draft').className     = 'step';
-  }
-
-  function setStep(id, state) {
+// ── Step helpers ───────────────────────────────────────────────────────────
+function setStepVisibility() {
+  document.getElementById('step-wealthbox').className = 'step' + (useWealthbox ? '' : ' skip');
+  document.getElementById('step-web').className       = 'step' + (useWebSearch ? '' : ' skip');
+  document.getElementById('step-email').className = 'step';
+  document.getElementById('step-draft').className = 'step';
+}
+function setStep(id, state) {
+  var el = document.getElementById(id);
+  if (!el || el.classList.contains('skip')) return;
+  el.className = 'step ' + state;
+  var icons = { done: '\u2713', active: '\u25cf', '': '\u23f3' };
+  el.querySelector('.step-icon').textContent = icons[state] || '\u23f3';
+}
+function resetSteps() {
+  ['step-email','step-wealthbox','step-web','step-draft'].forEach(function(id) {
     var el = document.getElementById(id);
-    if (!el || el.classList.contains('skip')) return;
-    el.className = 'step ' + state;
-    var icons = { done: '\u2713', active: '\u25cf', '': '\u23f3' };
-    el.querySelector('.step-icon').textContent = icons[state] || '\u23f3';
-  }
+    if (el) { el.className = 'step'; el.querySelector('.step-icon').textContent = '\u23f3'; }
+  });
+}
 
-  function resetSteps() {
-    ['step-email','step-wealthbox','step-web','step-draft'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) { el.className = 'step'; el.querySelector('.step-icon').textContent = '\u23f3'; }
-    });
-  }
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function setUI(loading, msg) {
+  var bar = document.getElementById('statusBar');
+  bar.style.display = loading ? 'flex' : 'none';
+  if (msg) document.getElementById('statusMsg').textContent = msg;
+  setAllBtns(loading);
+}
+function setAllBtns(disabled) {
+  document.getElementById('reviseBtn').disabled = disabled;
+  document.getElementById('draftGuessBtn').disabled = disabled;
+}
 
-  // ── UI helpers ─────────────────────────────────────────────────────────────
-  function setUI(loading, msg) {
-    var bar = document.getElementById('statusBar');
-    bar.style.display = loading ? 'flex' : 'none';
-    if (msg) document.getElementById('statusMsg').textContent = msg;
-    setAllBtns(loading);
-  }
-
-  function setAllBtns(disabled) {
-    document.getElementById('reviseBtn').disabled     = disabled;
-    document.getElementById('draftGuessBtn').disabled = disabled;
-  }
-
-  var toastTimer;
-  function showToast(msg, type) {
-    var el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className = type || '';
-    el.style.display = 'block';
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function() { el.style.display = 'none'; }, 3800);
-  }
+var toastTimer;
+function showToast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type || '';
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.style.display = 'none'; }, 3800);
+}
 </script>
+
 </body>
 </html>
