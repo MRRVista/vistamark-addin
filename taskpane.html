@@ -410,32 +410,17 @@
   function replaceBody() {
     if (!currentDraftHtml) return;
     var item = Office.context.mailbox.item;
-    // Read current body, inject our draft right after <body>, write back.
-    // Deterministic top-insertion. Signature + quoted reply chain stay below.
-    item.body.getAsync(Office.CoercionType.Html, function(getResult) {
-      if (getResult.status !== Office.AsyncResultStatus.Succeeded) {
-        var em = (getResult.error && getResult.error.message) ? getResult.error.message : "unknown";
-        setStatus("error", "Couldn't read current body: " + em, true);
-        return;
-      }
-      var existing = getResult.value || "";
-      var newBody;
-      var bodyTag = existing.match(/<body[^>]*>/i);
-      if (bodyTag) {
-        var idx = bodyTag.index + bodyTag[0].length;
-        newBody = existing.slice(0, idx) + currentDraftHtml + existing.slice(idx);
+    // prependAsync injects at the start of the body without replacing
+    // existing content. Avoids the scroll-to-bottom redraw that
+    // setAsync triggers in classic Outlook.
+    item.body.prependAsync(currentDraftHtml, { coercionType: Office.CoercionType.Html }, function(result) {
+      if (result.status === Office.AsyncResultStatus.Succeeded) {
+        setStatus("success", "Draft inserted at top.", true);
+        hideResult();
       } else {
-        newBody = currentDraftHtml + existing;
+        var msg = (result.error && result.error.message) ? result.error.message : "unknown error";
+        setStatus("error", "Couldn't insert draft: " + msg, true);
       }
-      item.body.setAsync(newBody, { coercionType: Office.CoercionType.Html }, function(setResult) {
-        if (setResult.status === Office.AsyncResultStatus.Succeeded) {
-          setStatus("success", "Draft inserted at top. Signature and reply chain preserved.", true);
-          hideResult();
-        } else {
-          var msg = (setResult.error && setResult.error.message) ? setResult.error.message : "unknown error";
-          setStatus("error", "Couldn't insert draft: " + msg, true);
-        }
-      });
     });
   }
 
