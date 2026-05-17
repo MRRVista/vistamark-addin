@@ -9,7 +9,9 @@
   :root {
     --gold: #D4A017;
     --gold-dark: #B88914;
+    --gold-soft: #FBF3DD;
     --navy: #1B2A4A;
+    --navy-soft: #E7EAF3;
     --near-black: #0E0E0E;
     --bg: #FAFAFA;
     --card: #FFFFFF;
@@ -21,6 +23,9 @@
     --error-bg: #FEF2F2;
     --error-text: #991B1B;
     --error-border: #FECACA;
+    --warn-bg: #FFFBEB;
+    --warn-text: #92400E;
+    --warn-border: #FDE68A;
     --info-bg: #F3F4F6;
   }
   * { box-sizing: border-box; }
@@ -80,10 +85,16 @@
     letter-spacing: 0.5px;
     color: var(--muted);
     margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .textarea-wrap {
+    position: relative;
   }
   textarea {
     width: 100%;
-    padding: 9px 10px;
+    padding: 9px 38px 9px 10px;
     border: 1px solid var(--border);
     border-radius: 4px;
     font-family: inherit;
@@ -96,6 +107,70 @@
     outline: none;
     border-color: var(--gold);
   }
+  .mic-btn {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--muted);
+    transition: all 0.15s ease;
+  }
+  .mic-btn:hover { color: var(--navy); border-color: var(--navy); }
+  .mic-btn.active {
+    color: white;
+    background: #DC2626;
+    border-color: #DC2626;
+    animation: pulse 1.2s infinite;
+  }
+  .mic-btn[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.6); }
+    50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+  }
+  .mic-btn svg { width: 14px; height: 14px; }
+
+  /* Intent buttons row */
+  .intent-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+  .intent-btn {
+    padding: 6px 10px;
+    background: var(--card);
+    color: var(--navy);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    font-family: inherit;
+  }
+  .intent-btn:hover:not(:disabled) {
+    border-color: var(--navy);
+    background: var(--navy-soft);
+  }
+  .intent-btn.active {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+  .intent-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
   .button {
     width: 100%;
     padding: 12px 16px;
@@ -108,6 +183,7 @@
     cursor: pointer;
     transition: background 0.15s ease;
     min-height: 44px;
+    font-family: inherit;
   }
   .button:hover:not(:disabled) {
     background: var(--gold-dark);
@@ -127,6 +203,7 @@
     background: var(--info-bg);
     border-color: var(--navy);
   }
+
   .status {
     margin-top: 10px;
     padding: 9px 12px;
@@ -149,6 +226,117 @@
     color: var(--success-text);
     border: 1px solid var(--success-border);
   }
+
+  /* Context strip */
+  .context-strip {
+    margin-top: 14px;
+    padding: 8px 12px;
+    background: var(--gold-soft);
+    border: 1px solid var(--warn-border);
+    border-radius: 4px;
+    font-size: 11.5px;
+    color: var(--near-black);
+    line-height: 1.45;
+    display: none;
+  }
+  .context-strip.visible { display: block; }
+  .context-strip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .context-pill {
+    display: inline-block;
+    padding: 1px 6px;
+    background: white;
+    border: 1px solid var(--warn-border);
+    border-radius: 9px;
+    font-size: 10.5px;
+    color: var(--warn-text);
+  }
+  .context-pill strong { color: var(--near-black); }
+
+  /* Subject suggestion banner */
+  .subject-banner {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--navy-soft);
+    border: 1px solid #C7CFE3;
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+  }
+  .subject-banner.visible { display: block; }
+  .subject-banner-title {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .subject-banner-current { color: var(--muted); text-decoration: line-through; font-size: 11.5px; }
+  .subject-banner-proposed { color: var(--near-black); font-weight: 600; margin-top: 2px; }
+  .subject-banner-reason { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .subject-banner-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+  }
+  .subject-banner-actions button {
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 11.5px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: white;
+    font-family: inherit;
+  }
+  .subject-banner-actions .accept {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+
+  /* Confidentiality flags */
+  .conf-flags {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    border-radius: 4px;
+    font-size: 12px;
+    display: none;
+  }
+  .conf-flags.visible { display: block; }
+  .conf-flags-title {
+    font-weight: 700;
+    color: var(--error-text);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .conf-chip {
+    display: block;
+    padding: 5px 8px;
+    background: white;
+    border: 1px solid var(--error-border);
+    border-radius: 3px;
+    margin-bottom: 4px;
+    font-size: 11.5px;
+  }
+  .conf-chip:last-child { margin-bottom: 0; }
+  .conf-chip-cat { font-weight: 700; color: var(--error-text); }
+  .conf-chip-excerpt {
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 2px;
+    font-size: 11px;
+  }
+
+  /* Result block */
   .result-block {
     margin-top: 14px;
     border: 1px solid var(--border);
@@ -166,6 +354,9 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   .result-body {
     padding: 12px 14px;
@@ -175,9 +366,7 @@
     overflow-y: auto;
     color: var(--near-black);
   }
-  .result-body p {
-    margin: 0 0 12px 0;
-  }
+  .result-body p { margin: 0 0 12px 0; }
   .result-body p:last-child { margin-bottom: 0; }
   .result-body ul, .result-body ol {
     margin: 0 0 12px 0;
@@ -196,6 +385,7 @@
     gap: 6px;
   }
   .result-actions .button { flex: 1; min-width: 0; }
+
   .footer {
     padding: 9px 14px;
     border-top: 1px solid var(--border);
@@ -226,6 +416,7 @@
     .header-title { font-size: 15px; }
     .container { padding: 12px; }
     .result-body { max-height: 280px; padding: 10px 12px; }
+    .intent-btn { padding: 5px 8px; font-size: 11px; }
   }
 </style>
 </head>
@@ -242,16 +433,61 @@
 <div class="container">
 
   <div class="section">
-    <div class="section-label">Instructions for this draft (optional)</div>
-    <textarea id="customInstructions" placeholder="e.g. mention the Tuesday call, lead with the answer, keep it cordial but firm"></textarea>
+    <div class="section-label">
+      <span>Instructions for this draft (optional)</span>
+      <span id="prewarmIndicator" style="display:none; color: var(--gold-dark); font-weight: 600;">Pre-warmed</span>
+    </div>
+    <div class="textarea-wrap">
+      <textarea id="customInstructions" placeholder="e.g. mention the Tuesday call, lead with the answer, keep it cordial but firm"></textarea>
+      <button class="mic-btn" id="micBtn" onclick="toggleDictation()" title="Voice dictate (Web Speech API)" disabled>
+        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/>
+          <path d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V20H8a1 1 0 0 0 0 2h8a1 1 0 0 0 0-2h-3v-2.08A7 7 0 0 0 19 11z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="section-label">Quick tone (optional)</div>
+  <div class="intent-row" id="intentRow">
+    <button class="intent-btn" data-intent="shorter" onclick="toggleIntent(this)">Shorter</button>
+    <button class="intent-btn" data-intent="warmer" onclick="toggleIntent(this)">Warmer</button>
+    <button class="intent-btn" data-intent="firmer" onclick="toggleIntent(this)">Firmer</button>
+    <button class="intent-btn" data-intent="push_back" onclick="toggleIntent(this)">Push back</button>
+    <button class="intent-btn" data-intent="decline" onclick="toggleIntent(this)">Decline</button>
+    <button class="intent-btn" data-intent="loop_in_sean" onclick="toggleIntent(this)">+Sean</button>
+    <button class="intent-btn" data-intent="loop_in_ryan" onclick="toggleIntent(this)">+Ryan</button>
+    <button class="intent-btn" data-intent="loop_in_bill" onclick="toggleIntent(this)">+Bill</button>
   </div>
 
   <button class="button" id="actionButton" onclick="runDraft()">Draft Reply</button>
 
   <div class="status" id="status"></div>
 
+  <div class="context-strip" id="contextStrip">
+    <div class="context-strip-row" id="contextStripRow"></div>
+  </div>
+
+  <div class="subject-banner" id="subjectBanner">
+    <div class="subject-banner-title">Suggested subject change</div>
+    <div class="subject-banner-current" id="subjectCurrent"></div>
+    <div class="subject-banner-proposed" id="subjectProposed"></div>
+    <div class="subject-banner-reason" id="subjectReason"></div>
+    <div class="subject-banner-actions">
+      <button class="accept" onclick="applySubjectSuggestion()">Apply</button>
+      <button onclick="dismissSubjectSuggestion()">Keep current</button>
+    </div>
+  </div>
+
+  <div class="conf-flags" id="confFlags">
+    <div class="conf-flags-title" id="confFlagsTitle">Confidentiality check</div>
+    <div id="confFlagsList"></div>
+  </div>
+
   <div class="result-block" id="resultBlock">
-    <div class="result-header">Randall's Draft</div>
+    <div class="result-header">
+      <span>Randall's Draft</span>
+    </div>
     <div class="result-body" id="resultBody"></div>
     <div class="result-actions">
       <button class="button" onclick="replaceBody()">Replace Body</button>
@@ -267,23 +503,215 @@
 
 <script>
   // -------- Configuration --------
-  const ENDPOINT_URL = "https://vistamark-m365.vercel.app/api/inbound/from-addin";
-  const ADDIN_SECRET = "LTBCiLpgSpxKgQOvSW7e7jdzvTknyx9P3oNucOaWb4pTWvSg";  // injected at deploy time
+  var ENDPOINT_URL = "https://vistamark-m365.vercel.app/api/inbound/from-addin";
+  var ENDPOINT_STREAM_URL = "https://vistamark-m365.vercel.app/api/inbound/from-addin-stream";
+  var ADDIN_SECRET = "LTBCiLpgSpxKgQOvSW7e7jdzvTknyx9P3oNucOaWb4pTWvSg";  // injected at deploy time
   // -------------------------------
 
-  let currentDraftHtml = "";
-  let currentDraftText = "";
+  // ============================================================================
+  // State
+  // ============================================================================
+
+  var currentDraftHtml = "";
+  var currentDraftText = "";
+  var currentDraftToken = "";
+  var currentSubjectProposed = "";
+
+  // Pre-warm: result of the request fired automatically when the taskpane
+  // opens. If the partner clicks Draft Reply without typing instructions or
+  // selecting an intent, we render this cached result instantly. Otherwise
+  // we fire a fresh streaming request with the current params.
+  var preWarmResult = null;     // { draftHtml, draftText, contextSummary, confidentialityFlags, subjectSuggestion, draftToken, capturedSubject, capturedToCsv }
+  var preWarmInFlight = false;
+
+  // Intent button: at most one active at a time.
+  var selectedIntent = null;
+
+  // Speech recognition (Web Speech API). Initialized in Office.onReady.
+  var speechRec = null;
+  var dictating = false;
+
+  // ============================================================================
+  // Office.onReady -- init mic, pre-warm if applicable
+  // ============================================================================
 
   Office.onReady(function() {
+    initSpeechRecognition();
     updateButtonLabel();
     setInterval(updateButtonLabel, 1500);
+
+    // Pre-warm: fire a non-streaming /from-addin request in the background
+    // on taskpane open IF the inbound has substantive content and there's
+    // no existing draft (mode=guess). This caches a result that we can
+    // serve instantly if the partner clicks Draft Reply without adding
+    // instructions or selecting an intent.
+    //
+    // Cost: one Anthropic call per taskpane open. Mitigated by only firing
+    // on substantive inbound (> 50 chars) and by NOT pre-warming when the
+    // partner has already typed a draft (revise mode -- they're iterating
+    // and probably want different params).
+    getCurrentBodyAsync(function(currentBody) {
+      var hasDraft = currentBody && currentBody.trim().length > 20;
+      if (hasDraft) return;  // revise mode -- don't pre-warm
+
+      getInboundContext(function(ctx) {
+        var threadLen = (ctx.threadBody || "").trim().length;
+        if (threadLen < 50) return;  // too thin to pre-warm meaningfully
+        firePreWarm(ctx);
+      });
+    });
   });
 
+  // ============================================================================
+  // Pre-warm
+  // ============================================================================
+
+  function firePreWarm(ctx) {
+    if (preWarmInFlight || preWarmResult) return;
+    preWarmInFlight = true;
+
+    var senderEmail = Office.context.mailbox.userProfile.emailAddress || "";
+    var senderName = Office.context.mailbox.userProfile.displayName || "";
+
+    getAttachmentsAndIds(function(att) {
+      var payload = {
+        sender_email: senderEmail,
+        sender_name: senderName,
+        mode: "guess",
+        subject: ctx.subject,
+        recipients: ctx.recipients,
+        thread_body: ctx.threadBody,
+        attachment_ids: att.ids,
+        item_id: att.itemId,
+        conversation_id: att.conversationId,
+      };
+
+      fetch(ENDPOINT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Addin-Secret": ADDIN_SECRET,
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(function(res) {
+        return res.json().then(function(json) { return { status: res.status, body: json }; });
+      })
+      .then(function(resp) {
+        preWarmInFlight = false;
+        if (resp.status !== 200 || !resp.body.draft_html) return;  // silent fail
+        preWarmResult = {
+          draftHtml: resp.body.draft_html,
+          draftText: resp.body.draft_text || "",
+          contextSummary: resp.body.context_summary || null,
+          confidentialityFlags: resp.body.confidentiality_flags || [],
+          subjectSuggestion: resp.body.subject_suggestion || null,
+          draftToken: resp.body.draft_token || "",
+          capturedSubject: ctx.subject || "",
+          capturedToCsv: (ctx.recipients.to || []).join(","),
+        };
+        // Surface the pre-warm indicator so Matt can see it landed.
+        var ind = document.getElementById("prewarmIndicator");
+        if (ind) ind.style.display = "inline";
+      })
+      .catch(function() { preWarmInFlight = false; });  // silent fail
+    });
+  }
+
+  function canUsePreWarm() {
+    if (!preWarmResult) return false;
+    var instr = document.getElementById("customInstructions").value.trim();
+    if (instr) return false;       // user typed instructions -- re-fire
+    if (selectedIntent) return false;  // user selected an intent -- re-fire
+    return true;
+  }
+
+  // ============================================================================
+  // Intent buttons (one-click tone)
+  // ============================================================================
+
+  function toggleIntent(btn) {
+    var intent = btn.getAttribute("data-intent");
+    var wasActive = btn.classList.contains("active");
+    // Clear all
+    document.querySelectorAll(".intent-btn").forEach(function(b) {
+      b.classList.remove("active");
+    });
+    if (wasActive) {
+      selectedIntent = null;
+    } else {
+      btn.classList.add("active");
+      selectedIntent = intent;
+    }
+    // Hide pre-warm indicator -- intent selection invalidates the cache
+    var ind = document.getElementById("prewarmIndicator");
+    if (ind && selectedIntent) ind.style.display = "none";
+  }
+
+  // ============================================================================
+  // Voice dictation (Web Speech API)
+  // ============================================================================
+
+  function initSpeechRecognition() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      // Browser doesn't support it (some Outlook mobile webviews don't).
+      // Leave the button disabled; cosmetic-only.
+      return;
+    }
+    speechRec = new SR();
+    speechRec.continuous = false;
+    speechRec.interimResults = false;
+    speechRec.lang = "en-US";
+
+    speechRec.onresult = function(evt) {
+      var transcript = "";
+      for (var i = evt.resultIndex; i < evt.results.length; i++) {
+        if (evt.results[i].isFinal) {
+          transcript += evt.results[i][0].transcript;
+        }
+      }
+      if (transcript) {
+        var ta = document.getElementById("customInstructions");
+        var sep = ta.value && !ta.value.endsWith(" ") ? " " : "";
+        ta.value = (ta.value + sep + transcript).trim();
+      }
+    };
+    speechRec.onerror = function() { stopDictation(); };
+    speechRec.onend = function() { stopDictation(); };
+
+    document.getElementById("micBtn").disabled = false;
+  }
+
+  function toggleDictation() {
+    if (!speechRec) return;
+    if (dictating) stopDictation();
+    else startDictation();
+  }
+
+  function startDictation() {
+    try {
+      speechRec.start();
+      dictating = true;
+      document.getElementById("micBtn").classList.add("active");
+    } catch (e) { /* already started */ }
+  }
+
+  function stopDictation() {
+    try { speechRec.stop(); } catch (e) { /* not started */ }
+    dictating = false;
+    document.getElementById("micBtn").classList.remove("active");
+  }
+
+  // ============================================================================
+  // Inbound context gathering
+  // ============================================================================
+
   function updateButtonLabel() {
-    const btn = document.getElementById("actionButton");
+    var btn = document.getElementById("actionButton");
     if (!btn || btn.disabled) return;
     getCurrentBodyAsync(function(body) {
-      const hasBody = body && body.trim().length > 20;
+      var hasBody = body && body.trim().length > 20;
       btn.textContent = hasBody ? "Refine Draft" : "Draft Reply";
     });
   }
@@ -310,7 +738,20 @@
       threadBody: "",
     };
 
+    // Item.subject in compose mode is a getter-with-getAsync (Recipients-like)
+    // in modern Office.js but a string in some older surfaces. Handle both.
     var tasks = [];
+
+    if (item.subject && typeof item.subject.getAsync === "function") {
+      tasks.push(new Promise(function(resolve) {
+        item.subject.getAsync(function(r) {
+          if (r.status === Office.AsyncResultStatus.Succeeded && typeof r.value === "string") {
+            ctx.subject = r.value;
+          }
+          resolve();
+        });
+      }));
+    }
 
     if (item.to && item.to.getAsync) {
       tasks.push(new Promise(function(resolve) {
@@ -349,68 +790,357 @@
     Promise.all(tasks).then(function() { callback(ctx); });
   }
 
-  function runDraft() {
-    var senderEmail = Office.context.mailbox.userProfile.emailAddress || "";
-    var senderName = Office.context.mailbox.userProfile.displayName || "";
+  // Gather attachment IDs from the current Outlook item, plus itemId and
+  // conversationId for cross-turn correlation. Used by both pre-warm and
+  // streaming runDraft. All fields optional in the backend.
+  function getAttachmentsAndIds(callback) {
+    var item = Office.context.mailbox.item;
+    var out = { ids: [], itemId: "", conversationId: "" };
 
+    try { if (item.conversationId) out.conversationId = item.conversationId; } catch (e) {}
+    try { if (item.itemId) out.itemId = item.itemId; } catch (e) {}
+
+    var tasks = [];
+
+    if (item.getAttachmentsAsync) {
+      tasks.push(new Promise(function(resolve) {
+        try {
+          item.getAttachmentsAsync(function(r) {
+            if (r.status === Office.AsyncResultStatus.Succeeded && Array.isArray(r.value)) {
+              out.ids = r.value.map(function(a) { return a.id; }).filter(Boolean);
+            }
+            resolve();
+          });
+        } catch (e) { resolve(); }
+      }));
+    } else if (item.attachments && Array.isArray(item.attachments)) {
+      out.ids = item.attachments.map(function(a) { return a.id; }).filter(Boolean);
+    }
+
+    Promise.all(tasks).then(function() { callback(out); });
+  }
+
+  // ============================================================================
+  // Run draft (streaming primary, non-streaming fallback)
+  // ============================================================================
+
+  function runDraft() {
     setStatus("info", "Asking Randall...", true);
     setButtonDisabled(true);
     hideResult();
+    hideContextStrip();
+    hideSubjectBanner();
+    hideConfFlags();
+
+    // Cached pre-warm path -- instant render
+    if (canUsePreWarm()) {
+      renderFinalPayload(preWarmResult, "from-prewarm");
+      setButtonDisabled(false);
+      return;
+    }
+
+    var senderEmail = Office.context.mailbox.userProfile.emailAddress || "";
+    var senderName = Office.context.mailbox.userProfile.displayName || "";
 
     getInboundContext(function(ctx) {
       getCurrentBodyAsync(function(currentBody) {
-        var hasDraft = currentBody && currentBody.trim().length > 20;
-        var mode = hasDraft ? "revise" : "guess";
+        getAttachmentsAndIds(function(att) {
+          var hasDraft = currentBody && currentBody.trim().length > 20;
+          var mode = hasDraft ? "revise" : "guess";
 
-        var payload = {
-          sender_email: senderEmail,
-          sender_name: senderName,
-          mode: mode,
-          subject: ctx.subject,
-          recipients: ctx.recipients,
-          thread_body: ctx.threadBody,
-          draft_body: hasDraft ? currentBody : undefined,
-          custom_instructions: document.getElementById("customInstructions").value.trim() || undefined,
-        };
+          var payload = {
+            sender_email: senderEmail,
+            sender_name: senderName,
+            mode: mode,
+            subject: ctx.subject,
+            recipients: ctx.recipients,
+            thread_body: ctx.threadBody,
+            draft_body: hasDraft ? currentBody : undefined,
+            custom_instructions: document.getElementById("customInstructions").value.trim() || undefined,
+            intent: selectedIntent || undefined,
+            attachment_ids: att.ids,
+            item_id: att.itemId,
+            conversation_id: att.conversationId,
+          };
 
-        fetch(ENDPOINT_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Addin-Secret": ADDIN_SECRET,
-          },
-          body: JSON.stringify(payload),
-        })
-        .then(function(res) {
-          return res.json().then(function(json) { return { status: res.status, body: json }; });
-        })
-        .then(function(resp) {
-          setButtonDisabled(false);
-          if (resp.status !== 200 || !resp.body.draft_html) {
-            var detail = resp.body.detail || resp.body.error || ("HTTP " + resp.status);
-            setStatus("error", "Randall couldn't draft: " + detail, true);
-            return;
-          }
-          currentDraftHtml = resp.body.draft_html;
-          currentDraftText = resp.body.draft_text || "";
-          // Render HTML preview so partner sees what Outlook will show.
-          document.getElementById("resultBody").innerHTML = currentDraftHtml;
-          showResult();
-          var ms = resp.body.diagnostics && resp.body.diagnostics.durationMs;
-          setStatus("success", "Draft ready" + (ms ? " (" + Math.round(ms / 100) / 10 + "s)" : "") + ".", true);
-        })
-        .catch(function(err) {
-          setButtonDisabled(false);
-          setStatus("error", "Network error: " + (err && err.message ? err.message : String(err)), true);
+          streamDraft(payload);
         });
       });
     });
   }
 
+  // Stream from /from-addin-stream via fetch + ReadableStream + manual SSE
+  // parsing. EventSource doesn't support POST so we parse the response body
+  // chunk by chunk. Falls back to non-streaming /from-addin on any parse
+  // error or HTTP failure -- old infrastructure stays as backstop.
+  function streamDraft(payload) {
+    var startedAt = Date.now();
+    var ticker = setInterval(function() {
+      var elapsed = Math.round((Date.now() - startedAt) / 1000);
+      setStatus("info", "Asking Randall... (" + elapsed + "s)", true);
+    }, 1000);
+
+    fetch(ENDPOINT_STREAM_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Addin-Secret": ADDIN_SECRET,
+        "Accept": "text/event-stream",
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(function(res) {
+      if (!res.ok || !res.body) {
+        clearInterval(ticker);
+        // Fall back to non-streaming
+        return fallbackNonStreaming(payload);
+      }
+      return readSSEStream(res.body, function(event, data) {
+        if (event === "tick") {
+          var elapsed = Math.round((data.elapsed_ms || 0) / 1000);
+          setStatus("info", "Asking Randall... (" + elapsed + "s, server tick)", true);
+        } else if (event === "phase") {
+          // Cosmetic only; the tick keeps the count
+        } else if (event === "done") {
+          clearInterval(ticker);
+          renderFinalPayload({
+            draftHtml: data.draft_html,
+            draftText: data.draft_text,
+            contextSummary: data.context_summary || null,
+            confidentialityFlags: data.confidentiality_flags || [],
+            subjectSuggestion: data.subject_suggestion || null,
+            draftToken: data.draft_token || "",
+          }, "from-stream");
+          setButtonDisabled(false);
+        } else if (event === "error") {
+          clearInterval(ticker);
+          setButtonDisabled(false);
+          var detail = data.detail || data.error || "unknown error";
+          setStatus("error", "Randall couldn't draft: " + detail, true);
+        }
+      });
+    })
+    .catch(function(err) {
+      clearInterval(ticker);
+      // Fall back to non-streaming on network error
+      return fallbackNonStreaming(payload).catch(function(err2) {
+        setButtonDisabled(false);
+        setStatus("error", "Network error: " + (err2 && err2.message ? err2.message : String(err2)), true);
+      });
+    });
+  }
+
+  function fallbackNonStreaming(payload) {
+    return fetch(ENDPOINT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Addin-Secret": ADDIN_SECRET,
+      },
+      body: JSON.stringify(payload),
+    })
+    .then(function(res) {
+      return res.json().then(function(json) { return { status: res.status, body: json }; });
+    })
+    .then(function(resp) {
+      setButtonDisabled(false);
+      if (resp.status !== 200 || !resp.body.draft_html) {
+        var detail = resp.body.detail || resp.body.error || ("HTTP " + resp.status);
+        setStatus("error", "Randall couldn't draft: " + detail, true);
+        return;
+      }
+      renderFinalPayload({
+        draftHtml: resp.body.draft_html,
+        draftText: resp.body.draft_text,
+        contextSummary: resp.body.context_summary || null,
+        confidentialityFlags: resp.body.confidentiality_flags || [],
+        subjectSuggestion: resp.body.subject_suggestion || null,
+        draftToken: resp.body.draft_token || "",
+      }, "from-fallback");
+    });
+  }
+
+  // Parse SSE event stream from a ReadableStream<Uint8Array>.
+  // SSE format: event: <name>\ndata: <json>\n\n
+  function readSSEStream(stream, onEvent) {
+    var reader = stream.getReader();
+    var decoder = new TextDecoder("utf-8");
+    var buffer = "";
+
+    function pump() {
+      return reader.read().then(function(chunk) {
+        if (chunk.done) return;
+        buffer += decoder.decode(chunk.value, { stream: true });
+
+        // Process complete events (separated by double newline)
+        var eventEnd;
+        while ((eventEnd = buffer.indexOf("\n\n")) !== -1) {
+          var raw = buffer.slice(0, eventEnd);
+          buffer = buffer.slice(eventEnd + 2);
+          var lines = raw.split("\n");
+          var evName = "message";
+          var dataLines = [];
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            if (line.indexOf("event:") === 0) {
+              evName = line.slice(6).trim();
+            } else if (line.indexOf("data:") === 0) {
+              dataLines.push(line.slice(5).trim());
+            }
+          }
+          if (dataLines.length > 0) {
+            var dataStr = dataLines.join("\n");
+            var parsed;
+            try { parsed = JSON.parse(dataStr); } catch (e) { parsed = { _raw: dataStr }; }
+            try { onEvent(evName, parsed); } catch (e) { /* swallow handler errors */ }
+          }
+        }
+
+        return pump();
+      });
+    }
+
+    return pump();
+  }
+
+  // ============================================================================
+  // Render the final payload (used by stream done, fallback, AND pre-warm)
+  // ============================================================================
+
+  function renderFinalPayload(payload, source) {
+    currentDraftHtml = payload.draftHtml || "";
+    currentDraftText = payload.draftText || "";
+    currentDraftToken = payload.draftToken || "";
+    document.getElementById("resultBody").innerHTML = currentDraftHtml;
+    showResult();
+
+    renderContextStrip(payload.contextSummary, source);
+    renderSubjectBanner(payload.subjectSuggestion);
+    renderConfFlags(payload.confidentialityFlags);
+
+    var ms = payload.contextSummary && payload.contextSummary.duration_ms;
+    var suffix = ms ? " (" + Math.round(ms / 100) / 10 + "s)" : "";
+    if (source === "from-prewarm") suffix += ", served from pre-warm";
+    setStatus("success", "Draft ready" + suffix + ".", true);
+  }
+
+  function renderContextStrip(cs, source) {
+    if (!cs) return;
+    var row = document.getElementById("contextStripRow");
+    row.innerHTML = "";
+
+    function pill(label, value) {
+      var sp = document.createElement("span");
+      sp.className = "context-pill";
+      var labelEl = document.createElement("strong");
+      labelEl.textContent = label + ": ";
+      sp.appendChild(labelEl);
+      sp.appendChild(document.createTextNode(value));
+      row.appendChild(sp);
+    }
+
+    var recipDesc = cs.recipients_total + " recipient" + (cs.recipients_total === 1 ? "" : "s");
+    if (cs.recipients_to && cs.recipients_to.length > 0) {
+      recipDesc = cs.recipients_to.slice(0, 2).join(", ");
+      if (cs.recipients_to.length > 2) recipDesc += " +" + (cs.recipients_to.length - 2);
+    }
+    pill("To", recipDesc);
+    pill("Mode", cs.mode);
+    if (cs.has_voice_samples) pill("Voice samples", String(cs.voice_samples_count));
+    if (cs.has_attachments) pill("Attachments", String(cs.attachments_count) + " (IDs plumbed)");
+    if (cs.intent_applied) pill("Intent", String(cs.intent_applied).replace(/_/g, " "));
+    pill("Tool calls", String(cs.tool_calls_made || 0));
+    if (cs.duration_ms) pill("Brain time", (Math.round(cs.duration_ms / 100) / 10) + "s");
+    if (source === "from-prewarm") pill("Source", "pre-warm cache");
+
+    document.getElementById("contextStrip").classList.add("visible");
+  }
+
+  function renderSubjectBanner(s) {
+    if (!s) return;
+    currentSubjectProposed = s.proposed;
+    document.getElementById("subjectCurrent").textContent = s.current || "(empty)";
+    document.getElementById("subjectProposed").textContent = s.proposed;
+    document.getElementById("subjectReason").textContent = s.reason || "";
+    document.getElementById("subjectBanner").classList.add("visible");
+  }
+
+  function applySubjectSuggestion() {
+    if (!currentSubjectProposed) return;
+    var item = Office.context.mailbox.item;
+    if (item.subject && typeof item.subject.setAsync === "function") {
+      item.subject.setAsync(currentSubjectProposed, function(r) {
+        if (r.status === Office.AsyncResultStatus.Succeeded) {
+          setStatus("success", "Subject updated.", true);
+        } else {
+          setStatus("error", "Couldn't update subject: " + (r.error && r.error.message ? r.error.message : "unknown"), true);
+        }
+      });
+    } else {
+      setStatus("error", "This Outlook host doesn't expose subject.setAsync.", true);
+    }
+    hideSubjectBanner();
+  }
+
+  function dismissSubjectSuggestion() {
+    hideSubjectBanner();
+  }
+
+  function renderConfFlags(flags) {
+    if (!flags || flags.length === 0) return;
+    var list = document.getElementById("confFlagsList");
+    list.innerHTML = "";
+    document.getElementById("confFlagsTitle").textContent =
+      "Confidentiality check -- " + flags.length + " potential flag" + (flags.length === 1 ? "" : "s");
+    flags.forEach(function(f) {
+      var chip = document.createElement("div");
+      chip.className = "conf-chip";
+      var cat = document.createElement("div");
+      cat.className = "conf-chip-cat";
+      cat.textContent = f.category;
+      chip.appendChild(cat);
+      if (f.excerpt) {
+        var ex = document.createElement("div");
+        ex.className = "conf-chip-excerpt";
+        ex.textContent = '"' + f.excerpt + '"';
+        chip.appendChild(ex);
+      }
+      list.appendChild(chip);
+    });
+    document.getElementById("confFlags").classList.add("visible");
+  }
+
+  // ============================================================================
+  // Replace Body -- preserves the v5.14.2 scroll-to-top fix verbatim,
+  // adds CustomProperties stash of draft_token + draft_text so the
+  // OnMessageSend handler in commands.js can correlate telemetry.
+  // ============================================================================
+
   function replaceBody() {
     if (!currentDraftHtml) return;
     var item = Office.context.mailbox.item;
-    // Scroll-to-top strategy (replaces previous prependAsync approach).
+
+    // ---- 1. Stash draft_token + draft_text in Outlook CustomProperties so
+    // ---- the OnMessageSend handler (commands.js, separate runtime) can
+    // ---- find them when the partner clicks Send. Fire-and-forget; no
+    // ---- error blocks the insertion if CustomProperties is unavailable.
+    if (currentDraftToken && item.loadCustomPropertiesAsync) {
+      try {
+        item.loadCustomPropertiesAsync(function(result) {
+          if (result.status !== Office.AsyncResultStatus.Succeeded) return;
+          var props = result.value;
+          try {
+            props.set("vistamarkDraftToken", currentDraftToken);
+            props.set("vistamarkDraftText", currentDraftText);
+            props.set("vistamarkDraftInsertedAt", String(Date.now()));
+            props.saveAsync(function() { /* swallow */ });
+          } catch (e) { /* swallow */ }
+        });
+      } catch (e) { /* swallow */ }
+    }
+
+    // ---- 2. Scroll-to-top strategy (v5.14.2). Replaces the previous
+    // ---- prependAsync approach.
     //
     // Background: prependAsync injects content at the start of the body
     // but DOES NOT move the cursor or change the compose pane's scroll
@@ -464,17 +1194,25 @@
   function discardResult() {
     currentDraftHtml = "";
     currentDraftText = "";
+    currentDraftToken = "";
+    currentSubjectProposed = "";
     hideResult();
+    hideContextStrip();
+    hideSubjectBanner();
+    hideConfFlags();
     setStatus("info", "Discarded.", true);
     setTimeout(function() { setStatus("info", "", false); }, 1500);
   }
 
-  function showResult() {
-    document.getElementById("resultBlock").classList.add("visible");
-  }
-  function hideResult() {
-    document.getElementById("resultBlock").classList.remove("visible");
-  }
+  // ============================================================================
+  // UI plumbing
+  // ============================================================================
+
+  function showResult() { document.getElementById("resultBlock").classList.add("visible"); }
+  function hideResult() { document.getElementById("resultBlock").classList.remove("visible"); }
+  function hideContextStrip() { document.getElementById("contextStrip").classList.remove("visible"); }
+  function hideSubjectBanner() { document.getElementById("subjectBanner").classList.remove("visible"); }
+  function hideConfFlags() { document.getElementById("confFlags").classList.remove("visible"); }
 
   function setStatus(kind, message, visible) {
     var el = document.getElementById("status");
