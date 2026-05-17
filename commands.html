@@ -2,10 +2,19 @@
 <html>
 <head>
   <meta charset="UTF-8"/>
+  <title>Vistamark AI Commands</title>
+  <!--
+    Outlook add-in command-surface runtime. Loaded by Office whenever the
+    LaunchEvent declared in manifest.xml fires (OnMessageSend). Office.js
+    must be loaded before commands.js -- the latter calls
+    Office.onReady + Office.actions.associate to register the handler.
+
+    This page is intentionally invisible -- it has no body content. The
+    runtime is short-lived: Office spawns it when the event fires,
+    commands.js handles the event, calls event.completed, runtime exits.
+  -->
   <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-  <script>
-    Office.onReady(function() {});
-  </script>
+  <script src="commands.js"></script>
 </head>
 <body></body>
 </html>
