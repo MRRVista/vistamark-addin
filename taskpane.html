@@ -410,17 +410,54 @@
   function replaceBody() {
     if (!currentDraftHtml) return;
     var item = Office.context.mailbox.item;
-    // prependAsync injects at the start of the body without replacing
-    // existing content. Avoids the scroll-to-bottom redraw that
-    // setAsync triggers in classic Outlook.
-    item.body.prependAsync(currentDraftHtml, { coercionType: Office.CoercionType.Html }, function(result) {
-      if (result.status === Office.AsyncResultStatus.Succeeded) {
-        setStatus("success", "Draft inserted at top.", true);
-        hideResult();
-      } else {
-        var msg = (result.error && result.error.message) ? result.error.message : "unknown error";
-        setStatus("error", "Couldn't insert draft: " + msg, true);
-      }
+    // Scroll-to-top strategy (replaces previous prependAsync approach).
+    //
+    // Background: prependAsync injects content at the start of the body
+    // but DOES NOT move the cursor or change the compose pane's scroll
+    // position. When Outlook creates a reply, it places the cursor at
+    // the bottom of the empty typing area (right above the quoted
+    // thread) and scrolls there. After a prependAsync, the draft is
+    // technically at the top of the body, but the compose pane is still
+    // scrolled to the bottom -- so the partner sees the quoted thread
+    // instead of their freshly inserted draft, and has to manually
+    // scroll up to find it.
+    //
+    // Fix: read the existing body as HTML, concatenate the draft in
+    // front, then setAsync the full new body. setAsync triggers a full
+    // body re-render in modern Outlook (web, new Outlook for Windows,
+    // Mac) which resets the compose pane scroll position to the top
+    // of the new body. After setAsync we also fire a no-op
+    // setSelectedDataAsync('') as a belt-and-suspenders nudge -- on a
+    // few Outlook builds the setAsync redraw doesn't commit scroll
+    // reset on its own and the empty-selection touch forces it.
+    //
+    // Trade-off: in classic Outlook for Windows (Outlook 2019/2021
+    // desktop) setAsync historically scrolled to the bottom of the new
+    // body in some builds. If that regression surfaces we'll branch on
+    // Office.context.diagnostics.host / platform; until then setAsync
+    // is the right call because the partners are on new Outlook /
+    // Outlook on the web.
+    item.body.getAsync(Office.CoercionType.Html, function(getResult) {
+      var existingBody = (getResult.status === Office.AsyncResultStatus.Succeeded)
+        ? (getResult.value || "")
+        : "";
+      var newBody = currentDraftHtml + existingBody;
+      item.body.setAsync(newBody, { coercionType: Office.CoercionType.Html }, function(setResult) {
+        if (setResult.status === Office.AsyncResultStatus.Succeeded) {
+          setStatus("success", "Draft inserted at top.", true);
+          hideResult();
+          // Scroll-to-top nudge: empty-selection insert at current
+          // cursor. The act of touching selection forces Outlook to
+          // commit pending redraws and apply the scroll reset from the
+          // setAsync above on builds where setAsync alone doesn't.
+          try {
+            item.body.setSelectedDataAsync('', { coercionType: Office.CoercionType.Html }, function() {});
+          } catch (e) { /* no-op fallback */ }
+        } else {
+          var msg = (setResult.error && setResult.error.message) ? setResult.error.message : "unknown error";
+          setStatus("error", "Couldn't insert draft: " + msg, true);
+        }
+      });
     });
   }
 
