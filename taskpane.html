@@ -1047,9 +1047,64 @@
     pill("To", recipDesc);
     pill("Mode", cs.mode);
     if (cs.has_voice_samples) pill("Voice samples", String(cs.voice_samples_count));
-    if (cs.has_attachments) pill("Attachments", String(cs.attachments_count) + " (IDs plumbed)");
+
+    // v5.16.2: smarter attachments pill -- show readable/unreadable when
+    // the backend actually fetched (i.e., item_id was present and
+    // fetchAttachmentBlocks ran). Fall back to legacy "(IDs plumbed)"
+    // wording when attachments_readable_count is absent so old taskpane
+    // <-> new backend AND new taskpane <-> old backend both render
+    // sensibly during rollout.
+    if (cs.has_attachments) {
+      var total = cs.attachments_count;
+      var readable = cs.attachments_readable_count;
+      var unreadable = (cs.attachments_unreadable && cs.attachments_unreadable.length) || 0;
+      var attDesc;
+      if (typeof readable === "number") {
+        if (readable > 0 && unreadable > 0) {
+          attDesc = readable + " of " + total + " read, " + unreadable + " unsupported";
+        } else if (readable > 0) {
+          attDesc = readable + " read";
+        } else if (unreadable > 0) {
+          attDesc = "0 of " + total + " read, " + unreadable + " unsupported";
+        } else {
+          attDesc = String(total) + " (no item_id; not fetched)";
+        }
+      } else {
+        attDesc = String(total) + " (IDs plumbed)";
+      }
+      pill("Attachments", attDesc);
+    }
+
     if (cs.intent_applied) pill("Intent", String(cs.intent_applied).replace(/_/g, " "));
-    pill("Tool calls", String(cs.tool_calls_made || 0));
+
+    // v5.16.2: tools pill -- shows what Randall actually consulted ("wb:contacts,
+    // sp:search, cal:search, web_search") instead of the bare "Tool calls: 5"
+    // count. Dedupes by short-name and abbreviates common prefixes so the pill
+    // doesn't blow out the narrow taskpane width. Falls back to the legacy
+    // "Tool calls: N" pill when the backend didn't supply tools_used (i.e.,
+    // old backend talking to new taskpane during rollout).
+    if (cs.tools_used && cs.tools_used.length > 0) {
+      var seen = {};
+      var clean = [];
+      for (var i = 0; i < cs.tools_used.length; i++) {
+        var name = cs.tools_used[i] || "";
+        if (!name) continue;
+        var pretty = name
+          .replace(/^wealthbox_/, "wb:")
+          .replace(/^sharepoint_/, "sp:")
+          .replace(/^teams_/, "tm:")
+          .replace(/^calendar_/, "cal:");
+        if (seen[pretty]) continue;
+        seen[pretty] = true;
+        clean.push(pretty);
+      }
+      var value = clean.join(", ");
+      if (value.length > 80) value = value.slice(0, 77) + "...";
+      pill("Tools", value);
+    } else {
+      pill("Tool calls", String(cs.tool_calls_made || 0));
+    }
+
     if (cs.duration_ms) pill("Brain time", (Math.round(cs.duration_ms / 100) / 10) + "s");
     if (source === "from-prewarm") pill("Source", "pre-warm cache");
 
