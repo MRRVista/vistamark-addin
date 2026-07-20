@@ -26,7 +26,7 @@
  * in this file -- changing it can lock the partner out of sending.
  */
 
-var TELEMETRY_URL = "https://vistamark-m365.vercel.app/api/inbound/edit-telemetry";
+var TELEMETRY_URL = "https://vistarandall.app/api/inbound/edit-telemetry";
 var TELEMETRY_TIMEOUT_MS = 3000;
 
 Office.onReady(function() {
