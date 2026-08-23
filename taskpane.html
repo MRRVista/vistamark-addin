@@ -505,7 +505,7 @@
   // -------- Configuration --------
   var ENDPOINT_URL = "https://vistarandall.app/api/inbound/from-addin";
   var ENDPOINT_STREAM_URL = "https://vistarandall.app/api/inbound/from-addin-stream";
-  var ADDIN_SECRET = "LTBCiLpgSpxKgQOvSW7e7jdzvTknyx9P3oNucOaWb4pTWvSg";  // injected at deploy time
+  // v5.17.0: auth is the Exchange user identity token (X-Identity-Token header). The old shared secret is retired -- a static page cannot keep a secret.
   // -------------------------------
 
   // ============================================================================
@@ -521,7 +521,7 @@
   // opens. If the partner clicks Draft Reply without typing instructions or
   // selecting an intent, we render this cached result instantly. Otherwise
   // we fire a fresh streaming request with the current params.
-  var preWarmResult = null;     // { draftHtml, draftText, contextSummary, confidentialityFlags, subjectSuggestion, draftToken, capturedSubject, capturedToCsv }
+  var preWarmResult = null;     // { draftHtml, draftText, contextSummary, confidentialityFlags, subjectSuggestion, draftToken, modelUsed, modelRouteReason, capturedSubject, capturedToCsv }
   var preWarmInFlight = false;
 
   // Intent button: at most one active at a time.
@@ -539,6 +539,19 @@
     initSpeechRecognition();
     updateButtonLabel();
     setInterval(updateButtonLabel, 1500);
+
+    // v5.17.0: typed instructions invalidate the pre-warm cache just like an
+    // intent chip does -- hide the Pre-warmed indicator as soon as the
+    // partner types something.
+    var instrEl = document.getElementById("customInstructions");
+    if (instrEl) {
+      instrEl.addEventListener("input", function() {
+        if (instrEl.value.trim()) {
+          var ind = document.getElementById("prewarmIndicator");
+          if (ind) ind.style.display = "none";
+        }
+      });
+    }
 
     // Pre-warm: fire a non-streaming /from-addin request in the background
     // on taskpane open IF the inbound has substantive content and there's
@@ -586,43 +599,53 @@
         conversation_id: att.conversationId,
       };
 
-      fetch(ENDPOINT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Addin-Secret": ADDIN_SECRET,
-        },
-        body: JSON.stringify(payload),
-      })
-      .then(function(res) {
-        return res.json().then(function(json) { return { status: res.status, body: json }; });
-      })
-      .then(function(resp) {
-        preWarmInFlight = false;
-        if (resp.status !== 200 || !resp.body.draft_html) return;  // silent fail
-        preWarmResult = {
-          draftHtml: resp.body.draft_html,
-          draftText: resp.body.draft_text || "",
-          contextSummary: resp.body.context_summary || null,
-          confidentialityFlags: resp.body.confidentiality_flags || [],
-          subjectSuggestion: resp.body.subject_suggestion || null,
-          draftToken: resp.body.draft_token || "",
-          capturedSubject: ctx.subject || "",
-          capturedToCsv: (ctx.recipients.to || []).join(","),
-        };
-        // Surface the pre-warm indicator so Matt can see it landed.
-        var ind = document.getElementById("prewarmIndicator");
-        if (ind) ind.style.display = "inline";
-      })
-      .catch(function() { preWarmInFlight = false; });  // silent fail
+      getIdentityToken(function(token) {
+        fetch(ENDPOINT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Identity-Token": token,
+          },
+          body: JSON.stringify(payload),
+        })
+        .then(function(res) {
+          return res.json().then(function(json) { return { status: res.status, body: json }; });
+        })
+        .then(function(resp) {
+          preWarmInFlight = false;
+          if (resp.status !== 200 || !resp.body.draft_html) return;  // silent fail
+          preWarmResult = {
+            draftHtml: resp.body.draft_html,
+            draftText: resp.body.draft_text || "",
+            contextSummary: resp.body.context_summary || null,
+            confidentialityFlags: resp.body.confidentiality_flags || [],
+            subjectSuggestion: resp.body.subject_suggestion || null,
+            draftToken: resp.body.draft_token || "",
+            modelUsed: (resp.body.diagnostics && resp.body.diagnostics.modelUsed) || "",
+            modelRouteReason: (resp.body.diagnostics && resp.body.diagnostics.modelRouteReason) || "",
+            capturedSubject: ctx.subject || "",
+            capturedToCsv: (ctx.recipients.to || []).join(","),
+          };
+          // Surface the pre-warm indicator so Matt can see it landed.
+          var ind = document.getElementById("prewarmIndicator");
+          if (ind) ind.style.display = "inline";
+        })
+        .catch(function() { preWarmInFlight = false; });  // silent fail
+      });
     });
   }
 
-  function canUsePreWarm() {
+  function canUsePreWarm(ctx) {
     if (!preWarmResult) return false;
     var instr = document.getElementById("customInstructions").value.trim();
     if (instr) return false;       // user typed instructions -- re-fire
     if (selectedIntent) return false;  // user selected an intent -- re-fire
+    // v5.17.0: staleness check -- the pre-warm captured the subject and To
+    // line at pane-open. If either changed since (say, a recipient was
+    // added), the cached draft no longer matches the message; re-fire.
+    if ((ctx.subject || "") !== (preWarmResult.capturedSubject || "")) return false;
+    var toCsv = (ctx.recipients.to || []).join(",");
+    if (toCsv !== (preWarmResult.capturedToCsv || "")) return false;
     return true;
   }
 
@@ -730,6 +753,17 @@
     } catch (e) { callback(""); }
   }
 
+  // v5.17.0: fetch the Exchange user identity token. Sent to the backend as
+  // X-Identity-Token on every request; the backend validates the Exchange
+  // signature and derives the sender identity from it.
+  function getIdentityToken(callback) {
+    try {
+      Office.context.mailbox.getUserIdentityTokenAsync(function(r) {
+        callback(r.status === Office.AsyncResultStatus.Succeeded ? (r.value || "") : "");
+      });
+    } catch (e) { callback(""); }
+  }
+
   function getInboundContext(callback) {
     var item = Office.context.mailbox.item;
     var ctx = {
@@ -776,6 +810,20 @@
       }));
     } else if (item.cc && Array.isArray(item.cc)) {
       ctx.recipients.cc = item.cc.map(function(x) { return x.emailAddress; }).filter(Boolean);
+    }
+    // v5.17.0: BCC was initialized but never collected, so the backend's
+    // confidentiality check could not see BCC recipients. Mirror the cc branch.
+    if (item.bcc && item.bcc.getAsync) {
+      tasks.push(new Promise(function(resolve) {
+        item.bcc.getAsync(function(r) {
+          if (r.status === Office.AsyncResultStatus.Succeeded && r.value) {
+            ctx.recipients.bcc = r.value.map(function(x) { return x.emailAddress; }).filter(Boolean);
+          }
+          resolve();
+        });
+      }));
+    } else if (item.bcc && Array.isArray(item.bcc)) {
+      ctx.recipients.bcc = item.bcc.map(function(x) { return x.emailAddress; }).filter(Boolean);
     }
 
     tasks.push(new Promise(function(resolve) {
@@ -832,17 +880,19 @@
     hideSubjectBanner();
     hideConfFlags();
 
-    // Cached pre-warm path -- instant render
-    if (canUsePreWarm()) {
-      renderFinalPayload(preWarmResult, "from-prewarm");
-      setButtonDisabled(false);
-      return;
-    }
-
     var senderEmail = Office.context.mailbox.userProfile.emailAddress || "";
     var senderName = Office.context.mailbox.userProfile.displayName || "";
 
     getInboundContext(function(ctx) {
+      // Cached pre-warm path -- instant render. v5.17.0: checked inside
+      // getInboundContext so the staleness check can compare the live
+      // subject/To against what the pre-warm captured.
+      if (canUsePreWarm(ctx)) {
+        renderFinalPayload(preWarmResult, "from-prewarm");
+        setButtonDisabled(false);
+        return;
+      }
+
       getCurrentBodyAsync(function(currentBody) {
         getAttachmentsAndIds(function(att) {
           var hasDraft = currentBody && currentBody.trim().length > 20;
@@ -880,83 +930,152 @@
       setStatus("info", "Asking Randall... (" + elapsed + "s)", true);
     }, 1000);
 
-    fetch(ENDPOINT_STREAM_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Addin-Secret": ADDIN_SECRET,
-        "Accept": "text/event-stream",
-      },
-      body: JSON.stringify(payload),
-    })
-    .then(function(res) {
-      if (!res.ok || !res.body) {
-        clearInterval(ticker);
-        // Fall back to non-streaming
-        return fallbackNonStreaming(payload);
-      }
-      return readSSEStream(res.body, function(event, data) {
-        if (event === "tick") {
-          var elapsed = Math.round((data.elapsed_ms || 0) / 1000);
-          setStatus("info", "Asking Randall... (" + elapsed + "s, server tick)", true);
-        } else if (event === "phase") {
-          // Cosmetic only; the tick keeps the count
-        } else if (event === "done") {
-          clearInterval(ticker);
-          renderFinalPayload({
-            draftHtml: data.draft_html,
-            draftText: data.draft_text,
-            contextSummary: data.context_summary || null,
-            confidentialityFlags: data.confidentiality_flags || [],
-            subjectSuggestion: data.subject_suggestion || null,
-            draftToken: data.draft_token || "",
-          }, "from-stream");
-          setButtonDisabled(false);
-        } else if (event === "error") {
-          clearInterval(ticker);
-          setButtonDisabled(false);
-          var detail = data.detail || data.error || "unknown error";
-          setStatus("error", "Randall couldn't draft: " + detail, true);
-        }
-      });
-    })
-    .catch(function(err) {
+    // v5.17.0: stream-hang + double-fallback guards. sawTerminal marks a
+    // proper done/error event; didFallback marks that fallbackNonStreaming
+    // already fired (it must never fire twice -- two full brain calls).
+    var sawTerminal = false;
+    var didFallback = false;
+    var finalized = false;
+
+    function deadStreamCleanup() {
       clearInterval(ticker);
-      // Fall back to non-streaming on network error
-      return fallbackNonStreaming(payload).catch(function(err2) {
-        setButtonDisabled(false);
-        setStatus("error", "Network error: " + (err2 && err2.message ? err2.message : String(err2)), true);
-      });
+      setButtonDisabled(false);
+      setStatus("error", "The connection ended before the draft finished. Please try again.", true);
+    }
+
+    // Hard wall-clock cap: 120s with no terminal event and no fallback means
+    // the stream is dead (kept long -- Fable turns are long; do not cut off
+    // a live stream).
+    var watchdog = setTimeout(function() {
+      if (sawTerminal || didFallback) return;
+      sawTerminal = true;  // stop finalize from reporting a second time
+      deadStreamCleanup();
+    }, 120000);
+
+    // Runs after the fetch/pump chain settles, success or failure. The
+    // ticker can never survive this. Skips the dead-stream message when a
+    // terminal event arrived or the fallback path took over the UI.
+    function finalize() {
+      if (finalized) return;
+      finalized = true;
+      clearTimeout(watchdog);
+      if (!sawTerminal && !didFallback) {
+        deadStreamCleanup();
+        return;
+      }
+      clearInterval(ticker);
+    }
+
+    getIdentityToken(function(token) {
+      fetch(ENDPOINT_STREAM_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Identity-Token": token,
+          "Accept": "text/event-stream",
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(function(res) {
+        if (!res.ok || !res.body) {
+          clearInterval(ticker);
+          clearTimeout(watchdog);
+          // Fall back to non-streaming
+          didFallback = true;
+          return fallbackNonStreaming(payload);
+        }
+        return readSSEStream(res.body, function(event, data) {
+          if (event === "tick") {
+            var elapsed = Math.round((data.elapsed_ms || 0) / 1000);
+            setStatus("info", "Asking Randall... (" + elapsed + "s, server tick)", true);
+          } else if (event === "phase") {
+            // Cosmetic only; the tick keeps the count
+          } else if (event === "done") {
+            sawTerminal = true;
+            clearTimeout(watchdog);
+            clearInterval(ticker);
+            renderFinalPayload({
+              draftHtml: data.draft_html,
+              draftText: data.draft_text,
+              contextSummary: data.context_summary || null,
+              confidentialityFlags: data.confidentiality_flags || [],
+              subjectSuggestion: data.subject_suggestion || null,
+              draftToken: data.draft_token || "",
+              modelUsed: (data.diagnostics && data.diagnostics.modelUsed) || "",
+              modelRouteReason: (data.diagnostics && data.diagnostics.modelRouteReason) || "",
+            }, "from-stream");
+            setButtonDisabled(false);
+          } else if (event === "error") {
+            sawTerminal = true;
+            clearTimeout(watchdog);
+            clearInterval(ticker);
+            setButtonDisabled(false);
+            var detail = data.detail || data.error || "unknown error";
+            setStatus("error", "Randall couldn't draft: " + detail, true);
+          }
+        });
+      })
+      .catch(function(err) {
+        clearInterval(ticker);
+        clearTimeout(watchdog);
+        if (didFallback) {
+          // v5.17.0: the fallback already ran and failed -- do NOT fire a
+          // second full brain call; surface the error directly.
+          setButtonDisabled(false);
+          setStatus("error", "Network error: " + (err && err.message ? err.message : String(err)), true);
+          return;
+        }
+        // Fall back to non-streaming on network error
+        didFallback = true;
+        return fallbackNonStreaming(payload).catch(function(err2) {
+          setButtonDisabled(false);
+          setStatus("error", "Network error: " + (err2 && err2.message ? err2.message : String(err2)), true);
+        });
+      })
+      .then(finalize, finalize);
     });
   }
 
   function fallbackNonStreaming(payload) {
-    return fetch(ENDPOINT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Addin-Secret": ADDIN_SECRET,
-      },
-      body: JSON.stringify(payload),
-    })
-    .then(function(res) {
-      return res.json().then(function(json) { return { status: res.status, body: json }; });
-    })
-    .then(function(resp) {
-      setButtonDisabled(false);
-      if (resp.status !== 200 || !resp.body.draft_html) {
-        var detail = resp.body.detail || resp.body.error || ("HTTP " + resp.status);
-        setStatus("error", "Randall couldn't draft: " + detail, true);
-        return;
-      }
-      renderFinalPayload({
-        draftHtml: resp.body.draft_html,
-        draftText: resp.body.draft_text,
-        contextSummary: resp.body.context_summary || null,
-        confidentialityFlags: resp.body.confidentiality_flags || [],
-        subjectSuggestion: resp.body.subject_suggestion || null,
-        draftToken: resp.body.draft_token || "",
-      }, "from-fallback");
+    // v5.17.0: token acquisition is async, so the fetch is wrapped in an
+    // explicit Promise to preserve the .then/.catch contract callers rely on:
+    // resolves after the response is handled (including handled HTTP errors),
+    // rejects on network/parse failure.
+    return new Promise(function(resolve, reject) {
+      getIdentityToken(function(token) {
+        fetch(ENDPOINT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Identity-Token": token,
+          },
+          body: JSON.stringify(payload),
+        })
+        .then(function(res) {
+          return res.json().then(function(json) { return { status: res.status, body: json }; });
+        })
+        .then(function(resp) {
+          setButtonDisabled(false);
+          if (resp.status !== 200 || !resp.body.draft_html) {
+            var detail = resp.body.detail || resp.body.error || ("HTTP " + resp.status);
+            setStatus("error", "Randall couldn't draft: " + detail, true);
+            resolve();
+            return;
+          }
+          renderFinalPayload({
+            draftHtml: resp.body.draft_html,
+            draftText: resp.body.draft_text,
+            contextSummary: resp.body.context_summary || null,
+            confidentialityFlags: resp.body.confidentiality_flags || [],
+            subjectSuggestion: resp.body.subject_suggestion || null,
+            draftToken: resp.body.draft_token || "",
+            modelUsed: (resp.body.diagnostics && resp.body.diagnostics.modelUsed) || "",
+            modelRouteReason: (resp.body.diagnostics && resp.body.diagnostics.modelRouteReason) || "",
+          }, "from-fallback");
+          resolve();
+        })
+        .catch(reject);
+      });
     });
   }
 
@@ -1014,7 +1133,7 @@
     document.getElementById("resultBody").innerHTML = currentDraftHtml;
     showResult();
 
-    renderContextStrip(payload.contextSummary, source);
+    renderContextStrip(payload.contextSummary, source, payload.modelUsed, payload.modelRouteReason);
     renderSubjectBanner(payload.subjectSuggestion);
     renderConfFlags(payload.confidentialityFlags);
 
@@ -1024,7 +1143,7 @@
     setStatus("success", "Draft ready" + suffix + ".", true);
   }
 
-  function renderContextStrip(cs, source) {
+  function renderContextStrip(cs, source, modelUsed, modelRouteReason) {
     if (!cs) return;
     var row = document.getElementById("contextStripRow");
     row.innerHTML = "";
@@ -1106,6 +1225,18 @@
     }
 
     if (cs.duration_ms) pill("Brain time", (Math.round(cs.duration_ms / 100) / 10) + "s");
+
+    // v5.17.0: model pill -- which model produced the draft, from the
+    // backend's diagnostics.modelUsed / diagnostics.modelRouteReason.
+    // Falsy-guarded so an old backend response renders exactly as before.
+    // Route reason shown only when it is not "default".
+    if (cs && modelUsed) {
+      var modelDesc = String(modelUsed).replace(/^claude-/, "");
+      if (modelRouteReason && modelRouteReason !== "default") {
+        modelDesc += " (" + modelRouteReason + ")";
+      }
+      pill("Model", modelDesc);
+    }
     if (source === "from-prewarm") pill("Source", "pre-warm cache");
 
     document.getElementById("contextStrip").classList.add("visible");
