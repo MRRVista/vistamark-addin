@@ -505,7 +505,13 @@
   // -------- Configuration --------
   var ENDPOINT_URL = "https://vistarandall.app/api/inbound/from-addin";
   var ENDPOINT_STREAM_URL = "https://vistarandall.app/api/inbound/from-addin-stream";
-  // v5.17.0: auth is the Exchange user identity token (X-Identity-Token header). The old shared secret is retired -- a static page cannot keep a secret.
+  // v5.17.0: auth is the Exchange user identity token (X-Identity-Token header).
+  // v5.17.1 HOTFIX: getUserIdentityTokenAsync returns nothing on tenants where
+  // Microsoft has turned off legacy Exchange tokens (this one), which left the
+  // pane 401ing. The shared secret below is restored as the working auth until
+  // Nested App Authentication (Entra) replaces it. The value was already in git
+  // history, so this re-add creates no new exposure. Backend accepts either.
+  var ADDIN_SECRET = "LTBCiLpgSpxKgQOvSW7e7jdzvTknyx9P3oNucOaWb4pTWvSg";
   // -------------------------------
 
   // ============================================================================
@@ -605,6 +611,7 @@
           headers: {
             "Content-Type": "application/json",
             "X-Identity-Token": token,
+          "X-Addin-Secret": ADDIN_SECRET,
           },
           body: JSON.stringify(payload),
         })
@@ -972,6 +979,7 @@
         headers: {
           "Content-Type": "application/json",
           "X-Identity-Token": token,
+          "X-Addin-Secret": ADDIN_SECRET,
           "Accept": "text/event-stream",
         },
         body: JSON.stringify(payload),
@@ -1048,6 +1056,7 @@
           headers: {
             "Content-Type": "application/json",
             "X-Identity-Token": token,
+          "X-Addin-Secret": ADDIN_SECRET,
           },
           body: JSON.stringify(payload),
         })
